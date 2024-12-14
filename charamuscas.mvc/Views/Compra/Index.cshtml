@@ -1,0 +1,36 @@
+﻿@model List<charamuscas.entities.Entities.compra>
+@{
+    ViewData["Title"] = "Compras";
+}
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Codigo</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Costo Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+
+                    <td><a asp-action="Details" asp-controller="Compra" asp-route-id="@item.PK_codigo">@item.PK_codigo</a></td>
+                    <td>@item.nombre</td>
+                    <td>@(item.cantidad.ToString("N2"))</td>
+                    <td>@(item.costo_total.ToString("C2"))</td>
+                </tr>
+            }
+            <tr>
+                <td colspan="3"></td>
+                <td>@(Model.Sum(x => x.costo_total).ToString("C2"))</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="nav-footer">
+    <a asp-action="Create" asp-controller="Compra" class="btn btn-primary"><i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">Nueva Compra</span></a>
+</div>

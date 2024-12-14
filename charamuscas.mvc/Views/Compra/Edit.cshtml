@@ -1,0 +1,83 @@
+﻿@model charamuscas.entities.Entities.compra
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Compras";
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Compras</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<form id="Form" asp-action="Edit" asp-controller="Compra" method="post">
+    <div class="container">
+        <div class="row">
+            <input type="hidden" asp-for="PK_codigo"/>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Compra *</label>
+                <input type="text" class="form-control" asp-for="nombre" />
+                <span asp-validation-for="nombre"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Fecha *</label>
+                <input type="date" class="form-control text-end" asp-for="fecha_compra" disabled/>
+                <span asp-validation-for="fecha_compra"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Cantidad *</label>
+                <input type="number" class="form-control text-end" name="cantidad" id="cantidad"
+                       value="@(Model.cantidad.ToString("N2"))" step="0.01" />
+                <span asp-validation-for="cantidad"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Costo Total *</label>
+                <input type="number" class="form-control text-end" name="costo_total" id="costo_total" 
+                       value="@(Model.costo_total.ToString("N2"))" step="0.01" />
+                <span asp-validation-for="costo_total"></span>
+            </div>
+        </div>
+    </div>
+    <div class="nav-footer">
+        <a asp-action="Index" asp-controller="Compra" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todas las Compras</span></a>
+        <a asp-action="Details" asp-controller="Compra" asp-route-id="@(Model.PK_codigo)" class="btn btn-outline-danger"><i class="fas fa-times"></i> <span class="d-md-inline-block d-none">Cancelar</span></a>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> <span class="d-md-inline-block d-none">Guardar</span></a>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#Form").validate({
+                rules: {
+                    cantidad: {
+                        required: true,
+                        min: 0 // Asegura que el valor no sea menor que 0
+                    },
+                    costo_total: {
+                        required: true,
+                        min: 0 // Asegura que el valor no sea menor que 0
+                    }
+                },
+                messages: {
+                    cantidad: {
+                        required: "Requerido.",
+                        min: "La cantidad no puede ser menor a 0."
+                    },
+                    costo_total: {
+                        required: "Requerido.",
+                        min: "El costo total no puede ser menor a 0."
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    error.addClass("text-danger"); // Añade la clase de Bootstrap para color rojo
+                    error.insertAfter(element); // Inserta el mensaje después del elemento correspondiente
+                }
+            });
+        });
+    </script>
+}
