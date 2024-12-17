@@ -14,8 +14,13 @@ namespace charamuscas.mvc.Controllers
             _db = db;
         }
         // GET: CompraController
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string search)
         {
+            if (!String.IsNullOrEmpty(search))
+            {
+                var buscarCompra = await _db.compra.Where(x => x.nombre.Contains(search)).OrderByDescending(x => x.PK_codigo).ToListAsync();
+                return View(buscarCompra);
+            }
             var compras = await _db.compra.OrderByDescending(x => x.PK_codigo).Take(100).ToListAsync();
 
             return View(compras);
