@@ -31,6 +31,7 @@ namespace charamuscas.mvc.Controllers
             try
             {
                 var compra = await _db.compra.FirstOrDefaultAsync(x => x.PK_codigo == id);
+                ViewBag.categorias = await _db.inventario_categoria.ToListAsync();
                 return View(compra);
             }
             catch (Exception ex)

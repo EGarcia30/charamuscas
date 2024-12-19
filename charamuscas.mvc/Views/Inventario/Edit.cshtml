@@ -1,0 +1,91 @@
+﻿@model charamuscas.entities.Entities.vw_inventario
+@using charamuscas.entities.Entities
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var categorias = (List<inventario_categoria>)ViewBag.categorias;
+    ViewData["Title"] = "Inventario";
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Inventario</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<form id="Form" asp-action="Edit" asp-controller="Inventario" method="post">
+    <div class="container">
+        <div class="row">
+            <input type="hidden" asp-for="PK_codigo" />
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Categoria *</label>
+                <select name="FK_categoria" id="FK_categoria" class="form-control">
+                    @foreach(var item in categorias)
+                    {
+                        <option value="@(item.PK_codigo)" selected=@(Model.FK_categoria == item.PK_codigo ? "selected" : "")>
+                            @(item.PK_codigo) - @(item.nombre)
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Producto *</label>
+                <input type="text" class="form-control" asp-for="producto" />
+                <span asp-validation-for="producto"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Cantidad *</label>
+                <input type="number" class="form-control text-end" name="cantidad" id="cantidad"
+                       value="@(Model.cantidad.ToString("N2"))" step="0.01" />
+                <span asp-validation-for="cantidad"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Precio Unitario *</label>
+                <input type="number" class="form-control text-end" name="precio_unitario" id="precio_unitario"
+                       value="@(Model.precio_unitario.ToString("N2"))" step="0.01" />
+                <span asp-validation-for="precio_unitario"></span>
+            </div>
+        </div>
+    </div>
+    <div class="nav-footer">
+        <a asp-action="Index" asp-controller="Inventario" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todo el Inventario</span></a>
+        <a asp-action="Details" asp-controller="Inventario" asp-route-id="@(Model.PK_hash)" class="btn btn-outline-danger"><i class="fas fa-times"></i> <span class="d-md-inline-block d-none">Cancelar</span></a>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> <span class="d-md-inline-block d-none">Guardar</span></a>
+    </div>
+</form>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Form").validate({
+                rules: {
+                    cantidad: {
+                        required: true,
+                        min: 0 // Asegura que el valor no sea menor que 0
+                    },
+                    precio_unitario: {
+                        required: true,
+                        min: 0 // Asegura que el valor no sea menor que 0
+                    }
+                },
+                messages: {
+                    cantidad: {
+                        required: "Requerido.",
+                        min: "La cantidad no puede ser menor a 0."
+                    },
+                    precio_unitario: {
+                        required: "Requerido.",
+                        min: "El precio unitario no puede ser menor a 0."
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    error.addClass("text-danger"); // Añade la clase de Bootstrap para color rojo
+                    error.insertAfter(element); // Inserta el mensaje después del elemento correspondiente
+                }
+            });
+        });
+    </script>
+}
