@@ -26,6 +26,7 @@
                 <th scope="col">Producto</th>
                 <th scope="col">Cantidad Disponible</th>
                 <th scope="col">Precio Unitario</th>
+                <th scope="col">Vender</th>
             </tr>
         </thead>
         <tbody>
@@ -43,11 +44,20 @@
                     <td>@item.producto</td>
                     <td>@(item.cantidad.ToString("N2"))</td>
                     <td>@(item.precio_unitario.ToString("C2"))</td>
+                    <td>
+                        <button onclick="abrirVenta()" class="btn btn-danger">
+                            <i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">
+                                Vender
+                            </span>
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+
 
 <div class="nav-footer">
     <a asp-action="Create"
@@ -59,3 +69,28 @@
        </span>
     </a>
 </div>
+
+<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+    </div>
+</div>
+
+<script>
+    function abrirVenta() {
+        var _url = '@Url.Action("_Modal_Venta", "Inventario")';
+            $.ajax({
+                url: _url,
+                type: 'POST',
+                success: function (data) {
+                    console.log(data)
+                    $('#edit-modal .modal-dialog').html(data);
+                    $('#edit-modal').modal('show');
+                },
+                error: function () {
+                    console.error('Error:', error);
+                    alert('Error al cargar los datos.');
+                }
+            });
+    }
+</script>

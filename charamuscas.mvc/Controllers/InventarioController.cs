@@ -101,5 +101,11 @@ namespace charamuscas.mvc.Controllers
                 return RedirectToAction("Details", "Inventario", new { id = value.PK_hash });
             }
         }
+
+        [HttpPost]
+        public ActionResult _Modal_Venta()
+        {
+            return PartialView();
+        }
     }
 }
