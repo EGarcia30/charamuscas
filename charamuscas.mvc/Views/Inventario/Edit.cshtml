@@ -4,7 +4,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    var categorias = (List<inventario_categoria>)ViewBag.categorias;
+    //var categorias = (SelectListItem<inventario_categoria>)ViewBag.categorias;
     ViewData["Title"] = "Inventario";
 }
 
@@ -22,14 +22,9 @@
             <input type="hidden" asp-for="PK_codigo" />
             <div class="col-lg-4 col-md-6 col-12 mb-3">
                 <label class="fs-5">Categoria *</label>
-                <select name="FK_categoria" id="FK_categoria" class="form-control">
-                    @foreach(var item in categorias)
-                    {
-                        <option value="@(item.PK_codigo)" selected=@(Model.FK_categoria == item.PK_codigo ? "selected" : "")>
-                            @(item.PK_codigo) - @(item.nombre)
-                        </option>
-                    }
+                <select asp-for="FK_categoria" asp-items="ViewBag.Categorias" class="form-control">                    
                 </select>
+                <span asp-validation-for="FK_categoria"></span>
             </div>
             <div class="col-lg-4 col-md-6 col-12 mb-3">
                 <label class="fs-5">Producto *</label>

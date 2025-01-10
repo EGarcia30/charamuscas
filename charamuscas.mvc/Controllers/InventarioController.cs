@@ -2,6 +2,7 @@
 using charamuscas.services.Contextos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace charamuscas.mvc.Controllers
@@ -71,8 +72,19 @@ namespace charamuscas.mvc.Controllers
         // GET: InventarioController/Edit/5
         public async Task<ActionResult> Edit(Guid id)
         {
+            //Almacenar informacion de producto en inventario seleccionado
             var inventario = await _db.vw_inventario.FirstOrDefaultAsync(x => x.PK_hash == id);
-            ViewBag.categorias = await _db.inventario_categoria.ToListAsync();
+            //lista de categoria
+            var categorias = await _db.inventario_categoria.ToListAsync();
+            //Convertir lista en SelectListItem
+            var sliCategorias = categorias.Select(x => new SelectListItem
+            {
+                Value = x.PK_codigo.ToString(),
+                Text = $"{x.PK_codigo} - {x.nombre}"
+            }).ToList();
+
+            //usar variable para mostrar en vista de categorias
+            ViewBag.Categorias = sliCategorias;
 
             return View(inventario);
         }
@@ -85,8 +97,9 @@ namespace charamuscas.mvc.Controllers
             {
                 if(value != null)
                 {
-
+                    //Guardar los cambios del registro de inventario
                     var inventario = await _db.inventario.FirstOrDefaultAsync(x => x.PK_codigo == value.PK_codigo);
+                    inventario.FK_categoria = value.FK_categoria;
                     inventario.nombre = value.producto;
                     inventario.cantidad = value.cantidad;
                     inventario.precio_unitario = value.precio_unitario;
