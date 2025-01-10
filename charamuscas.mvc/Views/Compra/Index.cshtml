@@ -14,32 +14,34 @@
             </button>
         </form>
     </div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Codigo</th>
-                <th scope="col">Producto</th>
-                <th scope="col">Cantidad</th>
-                <th scope="col">Costo Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
                 <tr>
-
-                    <td><a asp-action="Details" asp-controller="Compra" asp-route-id="@item.PK_codigo">@item.PK_codigo</a></td>
-                    <td>@item.nombre</td>
-                    <td>@(item.cantidad.ToString("N2"))</td>
-                    <td>@(item.costo_total.ToString("C2"))</td>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Costo Total</th>
                 </tr>
-            }
-            <tr>
-                <td colspan="3"></td>
-                <td>@(Model.Sum(x => x.costo_total).ToString("C2"))</td>
-            </tr>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td><a asp-action="Details" asp-controller="Compra" asp-route-id="@item.PK_codigo">@item.PK_codigo</a></td>
+                        <td>@item.nombre</td>
+                        <td>@(item.cantidad.ToString("N2"))</td>
+                        <td>@(item.costo_total.ToString("C2"))</td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="3"></td>
+                    <td>@(Model.Sum(x => x.costo_total).ToString("C2"))</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="nav-footer">

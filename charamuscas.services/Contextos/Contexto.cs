@@ -17,7 +17,8 @@ namespace charamuscas.services.Contextos
         public DbSet<compra> compra {  get; set; }
         public DbSet<inventario> inventario { get; set; }
         public DbSet<venta> venta { get; set; }
-        public DbSet<vw_venta> vw_venta { get; set; }
+        public DbSet<venta_detalle> venta_detalle { get; set; }
+        public DbSet<vw_venta_detalle> vw_venta_detalle { get; set; }
         public DbSet<vw_inventario> vw_inventario { get; set; }
         public DbSet<inventario_categoria> inventario_categoria { get; set; }
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

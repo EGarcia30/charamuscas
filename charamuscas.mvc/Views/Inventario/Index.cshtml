@@ -18,43 +18,40 @@
             </button>
         </form>
     </div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Codigo</th>
-                <th scope="col">Categoria</th>
-                <th scope="col">Producto</th>
-                <th scope="col">Cantidad Disponible</th>
-                <th scope="col">Precio Unitario</th>
-                <th scope="col">Vender</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
                 <tr>
-
-                    <td><a asp-action="Details" 
-                         asp-controller="Inventario"
-                         asp-route-id="@(item.PK_hash.ToString().ToUpper())">
-                            @item.PK_codigo
-                         </a>
-                    </td>
-                    <td>@item.categoria</td>
-                    <td>@item.producto</td>
-                    <td>@(item.cantidad.ToString("N2"))</td>
-                    <td>@(item.precio_unitario.ToString("C2"))</td>
-                    <td>
-                        <button onclick="abrirVenta()" class="btn btn-danger">
-                            <i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">
-                                Vender
-                            </span>
-                        </button>
-                    </td>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Cantidad Disponible</th>
+                    <th scope="col">Costo Unitario</th>
+                    <th scope="col">Precio Unitario</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            <a asp-action="Details"
+                               asp-controller="Inventario"
+                               asp-route-id="@(item.PK_hash.ToString().ToUpper())">
+                                @item.PK_codigo
+                            </a>
+                        </td>
+                        <td>@item.categoria</td>
+                        <td>@item.producto</td>
+                        <td>@(item.cantidad.ToString("N2"))</td>
+                        <td>@(item.costo_unitario.ToString("C2"))</td>
+                        <td>@(item.precio_unitario.ToString("C2"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 
@@ -69,30 +66,3 @@
        </span>
     </a>
 </div>
-
-<!--Modal de venta en vista parcial-->
-<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-
-    </div>
-</div>
-
-<script>
-    //Mostrar contenido de venta en vista parcial
-    function abrirVenta() {
-        var _url = '@Url.Action("_Modal_Venta", "Inventario")';
-            $.ajax({
-                url: _url,
-                type: 'POST',
-                success: function (data) {
-                    console.log(data)
-                    $('#edit-modal .modal-dialog').html(data);
-                    $('#edit-modal').modal('show');
-                },
-                error: function () {
-                    console.error('Error:', error);
-                    alert('Error al cargar los datos.');
-                }
-            });
-    }
-</script>
