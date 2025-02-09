@@ -1,14 +1,14 @@
-﻿@model List<charamuscas.entities.Entities.vw_inventario>
+﻿@model List<charamuscas.entities.Entities.venta>
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    ViewData["Title"] = "Inventario";
+    ViewData["Title"] = "Venta";
 }
 
 <div class="container">
-    <div class="d-flex flex-row-reverse">
-        <form asp-action="Index" asp-controller="Inventario" class="d-flex">
+    <div class="d-flex flex-row-reverse">       
+        <form asp-action="Index" asp-controller="Venta" class="d-flex">
             <input type="text"
                    name="search"
                    placeholder="Buscar"
@@ -23,11 +23,9 @@
             <thead>
                 <tr>
                     <th scope="col">Codigo</th>
-                    <th scope="col">Categoria</th>
-                    <th scope="col">Producto</th>
-                    <th scope="col">Cantidad Disponible</th>
-                    <th scope="col">Costo Unitario</th>
-                    <th scope="col">Precio Unitario</th>
+                    <th scope="col">Identificador</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Fecha</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,16 +35,14 @@
 
                         <td>
                             <a asp-action="Details"
-                               asp-controller="Inventario"
+                               asp-controller="Venta"
                                asp-route-id="@(item.PK_hash.ToString().ToUpper())">
                                 @item.PK_codigo
                             </a>
                         </td>
-                        <td>@item.categoria</td>
-                        <td>@item.producto</td>
-                        <td>@(item.cantidad.ToString("N2"))</td>
-                        <td>@(item.costo_unitario.ToString("C2"))</td>
-                        <td>@(item.precio_unitario.ToString("C2"))</td>
+                        <td>@item.PK_hash.ToString().ToUpper()</td>
+                        <td>@(item.total.ToString("C2"))</td>
+                        <td>@(item.fecha_hora)</td>
                     </tr>
                 }
             </tbody>
@@ -54,15 +50,14 @@
     </div>
 </div>
 
-
-
 <div class="nav-footer">
     <a asp-action="Create"
-       asp-controller="Inventario"
+       asp-controller="Venta"
        class="btn btn-primary">
-       <i class="fas fa-plus"></i> 
-       <span class="d-md-inline-block d-none">
-           Nuevo Inventario
-       </span>
+        <i class="fas fa-plus"></i>
+        <span class="d-md-inline-block d-none">
+            Nueva Venta
+        </span>
     </a>
 </div>
+

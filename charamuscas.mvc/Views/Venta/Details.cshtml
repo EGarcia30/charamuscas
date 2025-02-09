@@ -1,0 +1,316 @@
+﻿@model charamuscas.entities.Entities.venta
+@using charamuscas.entities.Entities
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var ventaDetalle = (List<vw_venta_detalle>)ViewBag.venta_detalle;
+    ViewData["Title"] = "Ventas";
+}
+<!--Encabezado-->
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Ventas</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<!--Descripción-->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Identificador:</label>
+            <label class="d-block fw-bold fs-5">@(Model.PK_hash.ToString().ToUpper())</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Fecha:</label>
+            <label class="d-block fw-bold fs-5">@(Model.fecha_hora.ToString("dd/MM/yyyy"))</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Total:</label>
+            <label class="d-block fw-bold fs-5">@(Model.total.ToString("C2"))</label>
+        </div>
+    </div>
+</div>
+
+<!--Tabla de detalle-->
+<div class="container mt-5">
+    <!--Sub-Menu-->
+    <div class="d-flex flex-row-reverse mb-3">
+        <div class="d-flex justify-content-between w-100">
+            <button onclick="listaProductos()" class="btn btn-dark me-1">
+                <i class="fas fa-plus"></i>
+                <span class="d-md-inline-block d-none">
+                    Agregar
+                </span>
+            </button>
+            <!--Formulario de busqueda-->
+            <div class="d-flex">
+                <input type="text"
+                       name="search"
+                       id="search"
+                       placeholder="Buscar"
+                       class="form-control me-1" 
+                       onkeyup="buscarVentaDetalle()"/>
+                <button type="button" onclick="buscarVentaDetalle()" class="btn btn-dark">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!--Tabla-->
+    <div id="ventaDetalle" class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Costo Unitario</th>
+                    <th scope="col">Precio Unitario</th>
+                    <th scope="col">Cantidad Vendida</th>
+                    <th scope="col">Subtotal</th>
+                    <th scope="col">Editar</th>
+                    <th scope="col">Eliminar</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ventaDetalle)
+                {
+                    <tr>
+                        <td>@item.categoria</td>
+                        <td>@item.producto</td>
+                        <td>@(item.costo_unitario.ToString("C2"))</td>
+                        <td>@(item.precio_unitario.ToString("C2"))</td>
+                        <td>@(item.cantidad_vendida.ToString("N2"))</td>
+                        <td>@(item.subtotal.ToString("C2"))</td>
+                        <td>
+                            <button onclick="agregarProducto()" class="btn btn-success">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <button onclick="agregarProducto()" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="4"></td>
+                    <td class="fw-bold">Total</td>
+                    <td>@(ventaDetalle.Sum(x => x.subtotal).ToString("C2"))</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--Modal de productos en vista parcial-->
+<div class="modal fade" id="productos-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    </div>
+</div>
+
+
+<!--Pie de pagina-->
+<div class="nav-footer">
+    <a asp-action="Index" asp-controller="Venta" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todas las ventas</span></a>
+    <a asp-action="Create" asp-controller="Venta" class="btn btn-primary"><i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">Nuevo</span></a>
+    <a asp-action="Edit" asp-controller="Venta" asp-route-id="@(Model.PK_hash)" class="btn btn-primary disabled"><i class="fas fa-pencil-alt"></i> <span class="d-md-inline-block d-none">Editar</span></a>
+</div>
+
+@section Scripts{
+    <!--Funciones de buscador-->
+    <script>
+        //Mostrar productos vendidos en esa venta
+        function buscarVentaDetalle() {
+            var data = {
+                ventaId: @Model.PK_codigo,
+                search: $('#search').val()
+            }
+            var _url = '@Url.Action("buscarVentaDetalle", "Venta")';
+
+            $.post(_url,data).done(function(res){
+                //cuerpo de la tabla
+                const cuerpoTabla = document.querySelector('#ventaDetalle tbody');
+
+                //restablecer infomación de la tabla
+                cuerpoTabla.innerHTML = "";
+
+                res.forEach(item => {
+                    let fila = document.createElement("tr"); // Crea una fila <tr>
+
+                    // Celda de categoría
+                    let celdaCategoria = document.createElement("td");
+                    celdaCategoria.textContent = item.categoria;
+                    fila.appendChild(celdaCategoria);
+
+                    // Celda de producto
+                    let celdaProducto = document.createElement("td");
+                    celdaProducto.textContent = item.producto;
+                    fila.appendChild(celdaProducto);
+
+                    // Celda de costo unitario (formateado como moneda)
+                    let celdaCostoUnitario = document.createElement("td");
+                    celdaCostoUnitario.textContent = formatCurrency(item.costo_unitario); // Usamos la función formatCurrency
+                    fila.appendChild(celdaCostoUnitario);
+
+                    // Celda de precio unitario (formateado como moneda)
+                    let celdaPrecioUnitario = document.createElement("td");
+                    celdaPrecioUnitario.textContent = formatCurrency(item.precio_unitario); // Usamos la función formatCurrency
+                    fila.appendChild(celdaPrecioUnitario);
+
+                    // Celda de cantidad vendida (formateado como número)
+                    let celdaCantidadVendida = document.createElement("td");
+                    celdaCantidadVendida.textContent = formatNumber(item.cantidad_vendida); // Usamos la función formatNumber
+                    fila.appendChild(celdaCantidadVendida);
+
+                    // Celda de subtotal (formateado como moneda)
+                    let celdaSubtotal = document.createElement("td");
+                    celdaSubtotal.textContent = formatCurrency(item.subtotal); // Usamos la función formatCurrency
+                    fila.appendChild(celdaSubtotal);
+
+                    // Celda del botón de editar
+                    let celdaEditar = document.createElement("td");
+                    let botonEditar = document.createElement("button");
+                    botonEditar.setAttribute("onclick", "editarProducto()"); // Asigna la función onclick
+                    botonEditar.className = "btn btn-success"; // Asigna las clases CSS
+                    botonEditar.innerHTML = '<i class="fas fa-edit"></i>'; // Asigna el icono
+                    celdaEditar.appendChild(botonEditar);
+                    fila.appendChild(celdaEditar);
+
+                    // Celda del botón de eliminar
+                    let celdaEliminar = document.createElement("td");
+                    let botonEliminar = document.createElement("button");
+                    botonEliminar.setAttribute("onclick", "eliminarProducto()"); // Asigna la función onclick
+                    botonEliminar.className = "btn btn-danger"; // Asigna las clases CSS
+                    botonEliminar.innerHTML = '<i class="fas fa-trash"></i>'; // Asigna el icono
+                    celdaEliminar.appendChild(botonEliminar);
+                    fila.appendChild(celdaEliminar);
+                    //agregar fila al cuerpo de la tabla
+                    cuerpoTabla.appendChild(fila)
+                });
+
+                // Crear la fila del total
+                let filaTotal = document.createElement("tr");
+
+                // Celda vacía (colspan = 4)
+                let celdaVacia1 = document.createElement("td");
+                celdaVacia1.setAttribute("colspan", "4");
+                filaTotal.appendChild(celdaVacia1);
+
+                // Celda "Total" (fw-bold)
+                let celdaTotalTexto = document.createElement("td");
+                celdaTotalTexto.textContent = "Total";
+                celdaTotalTexto.className = "fw-bold"; // Aplica la clase fw-bold
+                filaTotal.appendChild(celdaTotalTexto);
+
+                // Celda con el valor del total (formateado como moneda)
+                let celdaTotalValor = document.createElement("td");
+                celdaTotalValor.textContent = formatCurrency(calcularTotal(res)); // Calcula y formatea el total
+                filaTotal.appendChild(celdaTotalValor);
+
+                // Celda vacía (colspan = 2)
+                let celdaVacia2 = document.createElement("td");
+                celdaVacia2.setAttribute("colspan", "2");
+                filaTotal.appendChild(celdaVacia2);
+
+                cuerpoTabla.appendChild(filaTotal)
+
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+
+        // Funciones auxiliares para formatear moneda y número
+        function formatCurrency(number) {
+            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
+                style: 'currency',
+                currency: 'MXN' // Ajusta la moneda si es necesario
+            }).format(number);
+        }
+
+        function formatNumber(number) {
+            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(number);
+        }
+
+        // Función para calcular el total a partir del jsonData
+        function calcularTotal(jsonData) {
+            let total = 0;
+            jsonData.forEach(item => {
+                total += item.subtotal;
+            });
+            return total;
+        }
+        
+    </script>
+
+    <!--Funcion de mostrar modal de productos-->
+    <script>
+        //Mostrar contenido de venta en vista parcial
+        function listaProductos() {
+            var _url = '@Url.Action("_Modal_Productos", "Venta")';
+            $.ajax({
+                url: _url,
+                type: 'POST',
+                success: function (data) {
+                    $('#productos-modal .modal-dialog').html(data);
+                    $('#productos-modal').modal('show');
+                },
+                error: function () {
+                    console.error('Error:', error);
+                    alert('Error al cargar los datos.');
+                }
+            });
+        }
+    </script>
+
+    <!--Funciones para modal de lista de productos-->
+    <script>
+        //Mostrar contenido de venta en vista parcial
+        function AgregarProducto(id) {
+            var data = {
+                id: id
+            }
+            var _url = '@Url.Action("_Modal_Agregar_Producto", "Venta")';
+            $.post(_url, data).done(function (res) {
+                $('#agregar-producto-modal .modal-dialog').html(res);
+                $('#agregar-producto-modal').modal('show');
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>
+
+    <!--Funciones para modal de agregar producto-->
+    <script>
+        $(document).ready(function () {
+            $("#Form").validate({
+                rules: {
+                    cantidad: {
+                        required: false,
+                        min: 0.1 // Asegura que el valor no sea menor o igual que 0
+                    },
+                    precio_unitario: {
+                        required: false,
+                        min: 0 // Asegura que el valor no sea menor o igual que 0
+                    }
+                },
+                messages: {
+                    cantidad: {
+                        min: "La cantidad no puede ser menor a 0."
+                    },
+                    precio_unitario: {
+                        min: "El precio unitario no puede ser menor a 0."
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    error.addClass("text-danger"); // Añade la clase de Bootstrap para color rojo
+                    error.insertAfter(element); // Inserta el mensaje después del elemento correspondiente
+                }
+            });
+        });
+    </script>
+}

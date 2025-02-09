@@ -1,0 +1,46 @@
+﻿@model List<charamuscas.entities.Entities.vw_inventario>
+<div class="modal-content">
+    <div class="modal-header">
+        <h3 class="modal-title">Productos</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Categoria</th>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Cantidad Disponible</th>
+                        <th scope="col">Precio Unitario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.categoria</td>
+                            <td>@item.producto</td>
+                            <td>@(item.cantidad.ToString("N2"))</td>
+                            <td>@(item.precio_unitario.ToString("C2"))</td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="AgregarProducto(@(item.PK_codigo))">
+                                    <i class="fas fa-plus"></i> <span class="d-lg-inline-block d-none">Agregar</span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    </div>
+</div>
+
+<!--Modal agregar producto a la venta-->
+<div class="modal fade" id="agregar-producto-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    </div>
+</div>

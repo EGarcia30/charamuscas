@@ -17,6 +17,7 @@ namespace charamuscas.entities.Entities
         public decimal costo_unitario { get; set; }
         public int FK_venta { get; set; }
         public decimal cantidad_vendida { get; set; }
-
+        public decimal subtotal { get; set; }
+        public string categoria {  get; set; }
     }
 }
