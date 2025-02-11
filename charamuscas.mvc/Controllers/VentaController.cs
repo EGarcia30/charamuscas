@@ -32,6 +32,34 @@ namespace charamuscas.mvc.Controllers
             return View(venta);
         }
 
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Create(venta venta)
+        {
+            try
+            {
+                if(venta != null)
+                {
+                    venta.PK_hash = Guid.NewGuid();
+                    venta.fecha_hora = DateTime.Now;
+
+                    _db.venta.Add(venta);
+                    await _db.SaveChangesAsync();
+
+                    return RedirectToAction("Details", "Venta", new { id = venta.PK_hash });
+                }
+                return RedirectToAction("Create", "Venta");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Create", "Venta");
+            }
+        }
+
         // GET: VentaController/Details/5
         public async Task<ActionResult> Details(Guid id)
         {
@@ -68,6 +96,67 @@ namespace charamuscas.mvc.Controllers
         public async Task<ActionResult> _Modal_Agregar_Producto(int id)
         {
             var producto = await _db.vw_inventario.FirstOrDefaultAsync(x => x.PK_codigo == id);
+            return PartialView(producto);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AgregarProductoDetalle(vw_inventario inventario, int ventaId)
+        {
+            try
+            {
+                if(inventario != null)
+                {
+                    //Verificar que cantidad vendida no sea mayor a cantidad de stock
+                    var inventarioDB = await _db.inventario.FirstOrDefaultAsync(x => x.PK_codigo == inventario.PK_codigo);
+                    if (inventario.cantidad > inventarioDB.cantidad)
+                    {
+                        return Json(null);
+                    }
+
+                    //quitar cantidad disponible a inventario
+                    inventarioDB.cantidad = (inventarioDB.cantidad - inventario.cantidad);
+
+                    //sacar el subtotal del producto
+                    var subtotal = (inventario.cantidad * inventario.precio_unitario);
+
+                    //agregar el total a la venta
+                    var ventaDB = await _db.venta.FirstOrDefaultAsync(x => x.PK_codigo == ventaId);
+                    ventaDB.total += subtotal;
+
+                    //crear objeto de venta detalle
+                    venta_detalle ventaDetalle = new venta_detalle();
+                    ventaDetalle.FK_inventario = inventario.PK_codigo;
+                    ventaDetalle.FK_venta = ventaId;
+                    ventaDetalle.cantidad_vendida = inventario.cantidad;
+                    ventaDetalle.subtotal = subtotal;
+
+                    //Guardar en base de datos
+                    _db.venta_detalle.Add(ventaDetalle);
+                    await _db.SaveChangesAsync();
+
+                    //Todos los datos de la tabla venta detalle
+                    var productos = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).ToListAsync();
+
+                    var response = new
+                    {
+                        productosDetalle = productos,
+                        ventaTotal = ventaDB.total,
+                        inventarioCantidad = inventarioDB.cantidad,
+                    };
+
+                    return Json(response);
+                }
+                return Json(null);
+            }
+            catch (Exception ex) {
+                return Json(ex);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> _Modal_Editar_Producto(int id)
+        {
+            var producto = await _db.vw_venta_detalle.FirstOrDefaultAsync(x => x.PK_codigo == id);
             return PartialView(producto);
         }
     }

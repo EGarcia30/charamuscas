@@ -29,7 +29,7 @@
         </div>
         <div class="col-lg-4 col-md-6 col-12 mb-3">
             <label class="fs-5">Total:</label>
-            <label class="d-block fw-bold fs-5">@(Model.total.ToString("C2"))</label>
+            <label id="total" class="d-block fw-bold fs-5">@(Model.total.ToString("C2"))</label>
         </div>
     </div>
 </div>
@@ -86,7 +86,7 @@
                         <td>@(item.cantidad_vendida.ToString("N2"))</td>
                         <td>@(item.subtotal.ToString("C2"))</td>
                         <td>
-                            <button onclick="agregarProducto()" class="btn btn-success">
+                            <button onclick="abrirEditarProducto(@(item.PK_codigo))" class="btn btn-success">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </td>
@@ -114,6 +114,11 @@
     </div>
 </div>
 
+<div class="modal fade" id="editar-producto-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    </div>
+</div>
+
 
 <!--Pie de pagina-->
 <div class="nav-footer">
@@ -134,92 +139,7 @@
             var _url = '@Url.Action("buscarVentaDetalle", "Venta")';
 
             $.post(_url,data).done(function(res){
-                //cuerpo de la tabla
-                const cuerpoTabla = document.querySelector('#ventaDetalle tbody');
-
-                //restablecer infomación de la tabla
-                cuerpoTabla.innerHTML = "";
-
-                res.forEach(item => {
-                    let fila = document.createElement("tr"); // Crea una fila <tr>
-
-                    // Celda de categoría
-                    let celdaCategoria = document.createElement("td");
-                    celdaCategoria.textContent = item.categoria;
-                    fila.appendChild(celdaCategoria);
-
-                    // Celda de producto
-                    let celdaProducto = document.createElement("td");
-                    celdaProducto.textContent = item.producto;
-                    fila.appendChild(celdaProducto);
-
-                    // Celda de costo unitario (formateado como moneda)
-                    let celdaCostoUnitario = document.createElement("td");
-                    celdaCostoUnitario.textContent = formatCurrency(item.costo_unitario); // Usamos la función formatCurrency
-                    fila.appendChild(celdaCostoUnitario);
-
-                    // Celda de precio unitario (formateado como moneda)
-                    let celdaPrecioUnitario = document.createElement("td");
-                    celdaPrecioUnitario.textContent = formatCurrency(item.precio_unitario); // Usamos la función formatCurrency
-                    fila.appendChild(celdaPrecioUnitario);
-
-                    // Celda de cantidad vendida (formateado como número)
-                    let celdaCantidadVendida = document.createElement("td");
-                    celdaCantidadVendida.textContent = formatNumber(item.cantidad_vendida); // Usamos la función formatNumber
-                    fila.appendChild(celdaCantidadVendida);
-
-                    // Celda de subtotal (formateado como moneda)
-                    let celdaSubtotal = document.createElement("td");
-                    celdaSubtotal.textContent = formatCurrency(item.subtotal); // Usamos la función formatCurrency
-                    fila.appendChild(celdaSubtotal);
-
-                    // Celda del botón de editar
-                    let celdaEditar = document.createElement("td");
-                    let botonEditar = document.createElement("button");
-                    botonEditar.setAttribute("onclick", "editarProducto()"); // Asigna la función onclick
-                    botonEditar.className = "btn btn-success"; // Asigna las clases CSS
-                    botonEditar.innerHTML = '<i class="fas fa-edit"></i>'; // Asigna el icono
-                    celdaEditar.appendChild(botonEditar);
-                    fila.appendChild(celdaEditar);
-
-                    // Celda del botón de eliminar
-                    let celdaEliminar = document.createElement("td");
-                    let botonEliminar = document.createElement("button");
-                    botonEliminar.setAttribute("onclick", "eliminarProducto()"); // Asigna la función onclick
-                    botonEliminar.className = "btn btn-danger"; // Asigna las clases CSS
-                    botonEliminar.innerHTML = '<i class="fas fa-trash"></i>'; // Asigna el icono
-                    celdaEliminar.appendChild(botonEliminar);
-                    fila.appendChild(celdaEliminar);
-                    //agregar fila al cuerpo de la tabla
-                    cuerpoTabla.appendChild(fila)
-                });
-
-                // Crear la fila del total
-                let filaTotal = document.createElement("tr");
-
-                // Celda vacía (colspan = 4)
-                let celdaVacia1 = document.createElement("td");
-                celdaVacia1.setAttribute("colspan", "4");
-                filaTotal.appendChild(celdaVacia1);
-
-                // Celda "Total" (fw-bold)
-                let celdaTotalTexto = document.createElement("td");
-                celdaTotalTexto.textContent = "Total";
-                celdaTotalTexto.className = "fw-bold"; // Aplica la clase fw-bold
-                filaTotal.appendChild(celdaTotalTexto);
-
-                // Celda con el valor del total (formateado como moneda)
-                let celdaTotalValor = document.createElement("td");
-                celdaTotalValor.textContent = formatCurrency(calcularTotal(res)); // Calcula y formatea el total
-                filaTotal.appendChild(celdaTotalValor);
-
-                // Celda vacía (colspan = 2)
-                let celdaVacia2 = document.createElement("td");
-                celdaVacia2.setAttribute("colspan", "2");
-                filaTotal.appendChild(celdaVacia2);
-
-                cuerpoTabla.appendChild(filaTotal)
-
+                crearTablaDetalle(res);
             }).fail(function (err) { console.log(err.responseText) })
         }
 
@@ -245,6 +165,94 @@
                 total += item.subtotal;
             });
             return total;
+        }
+
+        function crearTablaDetalle(res) {
+            //cuerpo de la tabla
+            const cuerpoTabla = document.querySelector('#ventaDetalle tbody');
+
+            //restablecer infomación de la tabla
+            cuerpoTabla.innerHTML = "";
+
+            res.forEach(item => {
+                let fila = document.createElement("tr"); // Crea una fila <tr>
+
+                // Celda de categoría
+                let celdaCategoria = document.createElement("td");
+                celdaCategoria.textContent = item.categoria;
+                fila.appendChild(celdaCategoria);
+
+                // Celda de producto
+                let celdaProducto = document.createElement("td");
+                celdaProducto.textContent = item.producto;
+                fila.appendChild(celdaProducto);
+
+                // Celda de costo unitario (formateado como moneda)
+                let celdaCostoUnitario = document.createElement("td");
+                celdaCostoUnitario.textContent = formatCurrency(item.costo_unitario); // Usamos la función formatCurrency
+                fila.appendChild(celdaCostoUnitario);
+
+                // Celda de precio unitario (formateado como moneda)
+                let celdaPrecioUnitario = document.createElement("td");
+                celdaPrecioUnitario.textContent = formatCurrency(item.precio_unitario); // Usamos la función formatCurrency
+                fila.appendChild(celdaPrecioUnitario);
+
+                // Celda de cantidad vendida (formateado como número)
+                let celdaCantidadVendida = document.createElement("td");
+                celdaCantidadVendida.textContent = formatNumber(item.cantidad_vendida); // Usamos la función formatNumber
+                fila.appendChild(celdaCantidadVendida);
+
+                // Celda de subtotal (formateado como moneda)
+                let celdaSubtotal = document.createElement("td");
+                celdaSubtotal.textContent = formatCurrency(item.subtotal); // Usamos la función formatCurrency
+                fila.appendChild(celdaSubtotal);
+
+                // Celda del botón de editar
+                let celdaEditar = document.createElement("td");
+                let botonEditar = document.createElement("button");
+                botonEditar.setAttribute("onclick", "editarProducto()"); // Asigna la función onclick
+                botonEditar.className = "btn btn-success"; // Asigna las clases CSS
+                botonEditar.innerHTML = '<i class="fas fa-edit"></i>'; // Asigna el icono
+                celdaEditar.appendChild(botonEditar);
+                fila.appendChild(celdaEditar);
+
+                // Celda del botón de eliminar
+                let celdaEliminar = document.createElement("td");
+                let botonEliminar = document.createElement("button");
+                botonEliminar.setAttribute("onclick", "eliminarProducto()"); // Asigna la función onclick
+                botonEliminar.className = "btn btn-danger"; // Asigna las clases CSS
+                botonEliminar.innerHTML = '<i class="fas fa-trash"></i>'; // Asigna el icono
+                celdaEliminar.appendChild(botonEliminar);
+                fila.appendChild(celdaEliminar);
+                //agregar fila al cuerpo de la tabla
+                cuerpoTabla.appendChild(fila)
+            });
+
+            // Crear la fila del total
+            let filaTotal = document.createElement("tr");
+
+            // Celda vacía (colspan = 4)
+            let celdaVacia1 = document.createElement("td");
+            celdaVacia1.setAttribute("colspan", "4");
+            filaTotal.appendChild(celdaVacia1);
+
+            // Celda "Total" (fw-bold)
+            let celdaTotalTexto = document.createElement("td");
+            celdaTotalTexto.textContent = "Total";
+            celdaTotalTexto.className = "fw-bold"; // Aplica la clase fw-bold
+            filaTotal.appendChild(celdaTotalTexto);
+
+            // Celda con el valor del total (formateado como moneda)
+            let celdaTotalValor = document.createElement("td");
+            celdaTotalValor.textContent = formatCurrency(calcularTotal(res)); // Calcula y formatea el total
+            filaTotal.appendChild(celdaTotalValor);
+
+            // Celda vacía (colspan = 2)
+            let celdaVacia2 = document.createElement("td");
+            celdaVacia2.setAttribute("colspan", "2");
+            filaTotal.appendChild(celdaVacia2);
+
+            cuerpoTabla.appendChild(filaTotal);
         }
         
     </script>
@@ -312,5 +320,39 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        function EnviarDatosProducto(){
+            var data = {
+                ventaId: @Model.PK_codigo,
+                PK_codigo: $('#PK_codigo').val(),
+                cantidad: $('#cantidad').val(),
+                precio_unitario: $('#precio_unitario').val()
+            }
+            var _url = '@Url.Action("AgregarProductoDetalle", "Venta")';
+
+            $.post(_url, data).done(function (res) {  
+                console.log(res);
+                $('#agregar-producto-modal').modal('hide');
+                $('#total').html(formatCurrency(res.ventaTotal));
+                crearTablaDetalle(res.productosDetalle);
+
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>
+
+    <!--Funciones para editar producto-->
+    <script>
+        function abrirEditarProducto(id){
+            var data = {
+                id: id
+            }
+            var _url = '@Url.Action("_Modal_Editar_Producto", "Venta")';
+            $.post(_url, data).done(function (res) {
+                $('#editar-producto-modal .modal-dialog').html(res);
+                $('#editar-producto-modal').modal('show');
+            }).fail(function (err) { console.log(err.responseText) })
+        }
     </script>
 }
