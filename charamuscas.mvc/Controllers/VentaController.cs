@@ -129,6 +129,7 @@ namespace charamuscas.mvc.Controllers
                     ventaDetalle.FK_inventario = inventario.PK_codigo;
                     ventaDetalle.FK_venta = ventaId;
                     ventaDetalle.cantidad_vendida = inventario.cantidad;
+                    ventaDetalle.precio_venta = inventario.precio_unitario;
                     ventaDetalle.subtotal = subtotal;
 
                     //Guardar en base de datos
@@ -184,10 +185,11 @@ namespace charamuscas.mvc.Controllers
 
                     //asignamos nuevos valores
                     item.cantidad_vendida = value.cantidad_vendida;
+                    item.precio_venta = value.precio_venta;
                     producto.cantidad -= value.cantidad_vendida;
 
                     //nuevo subtotal
-                    var subtotal = (item.cantidad_vendida * value.precio_unitario);
+                    var subtotal = (item.cantidad_vendida * value.precio_venta);
                     item.subtotal = subtotal;
 
                     //cambio en base de datos

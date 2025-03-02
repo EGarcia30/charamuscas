@@ -67,7 +67,7 @@
                     <th scope="col">Categoria</th>
                     <th scope="col">Producto</th>
                     <th scope="col">Costo Unitario</th>
-                    <th scope="col">Precio Unitario</th>
+                    <th scope="col">Precio Venta</th>
                     <th scope="col">Cantidad Vendida</th>
                     <th scope="col">Subtotal</th>
                     <th scope="col">Editar</th>
@@ -82,7 +82,7 @@
                         <td>@item.categoria</td>
                         <td>@item.producto</td>
                         <td>@(item.costo_unitario.ToString("C2"))</td>
-                        <td>@(item.precio_unitario.ToString("C2"))</td>
+                        <td>@(item.precio_venta.ToString("C2"))</td>
                         <td>@(item.cantidad_vendida.ToString("N2"))</td>
                         <td>@(item.subtotal.ToString("C2"))</td>
                         <td>
@@ -202,7 +202,7 @@
 
                 // Celda de precio unitario (formateado como moneda)
                 let celdaPrecioUnitario = document.createElement("td");
-                celdaPrecioUnitario.textContent = formatCurrency(item.precio_unitario); // Usamos la función formatCurrency
+                celdaPrecioUnitario.textContent = formatCurrency(item.precio_venta); // Usamos la función formatCurrency
                 fila.appendChild(celdaPrecioUnitario);
 
                 // Celda de cantidad vendida (formateado como número)
@@ -372,7 +372,7 @@
                 PK_codigo: id,
                 ventaId: ventaId,
                 cantidad_vendida: $("#cantidad_vendida").val(),
-                precio_unitario: $("#precio_unitario").val()
+                precio_venta: $("#precio_venta").val()
 
             }
             var _url = '@Url.Action("EditarProducto", "Venta")';
@@ -381,6 +381,7 @@
                 if (res != null) {
                     $('#total').html(formatCurrency(res.ventaTotal));
                     var tr = document.getElementById(`${res.venta_detalle.pK_codigo}`);
+                    tr.children[3].textContent = formatCurrency(res.venta_detalle.precio_venta);
                     tr.children[4].textContent = formatNumber(res.venta_detalle.cantidad_vendida);
                     tr.children[5].textContent = formatCurrency(res.venta_detalle.subtotal);
                     $('#productosTotal').html(formatCurrency(res.ventaTotal));
