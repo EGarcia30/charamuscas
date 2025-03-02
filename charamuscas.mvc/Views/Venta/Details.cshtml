@@ -78,7 +78,7 @@
             <tbody>
                 @foreach (var item in ventaDetalle)
                 {
-                    <tr>
+                    <tr id="@(item.PK_codigo)">
                         <td>@item.categoria</td>
                         <td>@item.producto</td>
                         <td>@(item.costo_unitario.ToString("C2"))</td>
@@ -86,12 +86,12 @@
                         <td>@(item.cantidad_vendida.ToString("N2"))</td>
                         <td>@(item.subtotal.ToString("C2"))</td>
                         <td>
-                            <button onclick="abrirEditarProducto(@(item.PK_codigo))" class="btn btn-success">
+                            <button onclick="abrirEditarProducto(@(item.PK_codigo),@(Model.PK_codigo))" class="btn btn-success">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </td>
                         <td>
-                            <button onclick="agregarProducto()" class="btn btn-danger">
+                            <button onclick="abrirEliminarProducto(@(item.PK_codigo),@(Model.PK_codigo))" class="btn btn-danger">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -100,7 +100,7 @@
                 <tr>
                     <td colspan="4"></td>
                     <td class="fw-bold">Total</td>
-                    <td>@(ventaDetalle.Sum(x => x.subtotal).ToString("C2"))</td>
+                    <td id="productosTotal">@(ventaDetalle.Sum(x => x.subtotal).ToString("C2"))</td>
                     <td colspan="2"></td>
                 </tr>
             </tbody>
@@ -114,8 +114,15 @@
     </div>
 </div>
 
+<!--Modal de editar producto en vista parcial-->
 <div class="modal fade" id="editar-producto-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    </div>
+</div>
+
+<!--Modal de eliminar producto en vista parcial-->
+<div class="modal fade" id="eliminar-producto-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
     </div>
 </div>
 
@@ -176,6 +183,7 @@
 
             res.forEach(item => {
                 let fila = document.createElement("tr"); // Crea una fila <tr>
+                fila.setAttribute("id", item.pK_codigo);
 
                 // Celda de categoría
                 let celdaCategoria = document.createElement("td");
@@ -210,7 +218,7 @@
                 // Celda del botón de editar
                 let celdaEditar = document.createElement("td");
                 let botonEditar = document.createElement("button");
-                botonEditar.setAttribute("onclick", "editarProducto()"); // Asigna la función onclick
+                botonEditar.setAttribute("onclick", "abrirEditarProducto(" + item.pK_codigo + " , " + "@(Model.PK_codigo))"); // Asigna la función onclick
                 botonEditar.className = "btn btn-success"; // Asigna las clases CSS
                 botonEditar.innerHTML = '<i class="fas fa-edit"></i>'; // Asigna el icono
                 celdaEditar.appendChild(botonEditar);
@@ -219,13 +227,14 @@
                 // Celda del botón de eliminar
                 let celdaEliminar = document.createElement("td");
                 let botonEliminar = document.createElement("button");
-                botonEliminar.setAttribute("onclick", "eliminarProducto()"); // Asigna la función onclick
+                botonEliminar.setAttribute("onclick", "abrirEliminarProducto(" + item.pK_codigo + " , " + "@(Model.PK_codigo))"); // Asigna la función onclick
                 botonEliminar.className = "btn btn-danger"; // Asigna las clases CSS
                 botonEliminar.innerHTML = '<i class="fas fa-trash"></i>'; // Asigna el icono
                 celdaEliminar.appendChild(botonEliminar);
                 fila.appendChild(celdaEliminar);
                 //agregar fila al cuerpo de la tabla
                 cuerpoTabla.appendChild(fila)
+                console.log(item)
             });
 
             // Crear la fila del total
@@ -244,6 +253,7 @@
 
             // Celda con el valor del total (formateado como moneda)
             let celdaTotalValor = document.createElement("td");
+            celdaTotalValor.setAttribute("id", "productosTotal")
             celdaTotalValor.textContent = formatCurrency(calcularTotal(res)); // Calcula y formatea el total
             filaTotal.appendChild(celdaTotalValor);
 
@@ -333,7 +343,6 @@
             var _url = '@Url.Action("AgregarProductoDetalle", "Venta")';
 
             $.post(_url, data).done(function (res) {  
-                console.log(res);
                 $('#agregar-producto-modal').modal('hide');
                 $('#total').html(formatCurrency(res.ventaTotal));
                 crearTablaDetalle(res.productosDetalle);
@@ -344,14 +353,70 @@
 
     <!--Funciones para editar producto-->
     <script>
-        function abrirEditarProducto(id){
+        function abrirEditarProducto(id, ventaId){
             var data = {
-                id: id
+                id: id,
+                ventaId: ventaId
             }
             var _url = '@Url.Action("_Modal_Editar_Producto", "Venta")';
             $.post(_url, data).done(function (res) {
                 $('#editar-producto-modal .modal-dialog').html(res);
                 $('#editar-producto-modal').modal('show');
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>
+
+    <script>
+        function editarProducto(id, ventaId) {
+            var data = {
+                PK_codigo: id,
+                ventaId: ventaId,
+                cantidad_vendida: $("#cantidad_vendida").val(),
+                precio_unitario: $("#precio_unitario").val()
+
+            }
+            var _url = '@Url.Action("EditarProducto", "Venta")';
+            $.post(_url, data).done(function (res) {
+                $('#editar-producto-modal').modal('hide');
+                if (res != null) {
+                    $('#total').html(formatCurrency(res.ventaTotal));
+                    var tr = document.getElementById(`${res.venta_detalle.pK_codigo}`);
+                    tr.children[4].textContent = formatNumber(res.venta_detalle.cantidad_vendida);
+                    tr.children[5].textContent = formatCurrency(res.venta_detalle.subtotal);
+                    $('#productosTotal').html(formatCurrency(res.ventaTotal));
+                }
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>
+
+    <!--Funciones para eliminar producto-->
+    <script>
+        function abrirEliminarProducto(id,ventaId) {
+            var data = {
+                id: id,
+                ventaId: ventaId
+            }
+            var _url = '@Url.Action("_Modal_Eliminar_Producto", "Venta")';
+            $.post(_url, data).done(function (res) {
+                $('#eliminar-producto-modal .modal-dialog').html(res);
+                $('#eliminar-producto-modal').modal('show');
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>
+
+    <script>
+        function eliminarProducto(id,ventaId) {
+            var data = {
+                id: id,
+                ventaId: ventaId
+            }
+            var _url = '@Url.Action("EliminarProducto", "Venta")';
+            $.post(_url, data).done(function (res) {
+                $('#eliminar-producto-modal').modal('hide');
+                if(res != null){
+                    $('#total').html(formatCurrency(res.ventaTotal));
+                    crearTablaDetalle(res.productosDetalle);
+                }
             }).fail(function (err) { console.log(err.responseText) })
         }
     </script>

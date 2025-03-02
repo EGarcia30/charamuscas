@@ -3,6 +3,7 @@ using charamuscas.services.Contextos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace charamuscas.mvc.Controllers
 {
@@ -135,7 +136,7 @@ namespace charamuscas.mvc.Controllers
                     await _db.SaveChangesAsync();
 
                     //Todos los datos de la tabla venta detalle
-                    var productos = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).ToListAsync();
+                    var productos = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).OrderByDescending(x => x.PK_codigo).ToListAsync();
 
                     var response = new
                     {
@@ -154,10 +155,115 @@ namespace charamuscas.mvc.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> _Modal_Editar_Producto(int id)
+        public async Task<ActionResult> _Modal_Editar_Producto(int id, int ventaId)
         {
             var producto = await _db.vw_venta_detalle.FirstOrDefaultAsync(x => x.PK_codigo == id);
+            ViewBag.ventaId = ventaId;
             return PartialView(producto);
+        }
+
+        public async Task<JsonResult> EditarProducto(vw_venta_detalle value, int ventaId)
+        {
+            try
+            {
+                if(value != null)
+                {
+                    //Traemos el objecto de venta detalle
+                    var item = await _db.venta_detalle.FirstOrDefaultAsync(x => x.PK_codigo == value.PK_codigo);
+                    //traemos el iventario(producto)
+                    var producto = await _db.inventario.FirstOrDefaultAsync(x => x.PK_codigo == item.FK_inventario);
+
+                    //Se regresan los productos comprados a mi inventario
+                    producto.cantidad += item.cantidad_vendida;
+
+                    //condicion de no vender menor a 0 productos en inventario o compra que supera el inventario
+                    if(producto.cantidad <= 0 || producto.cantidad < value.cantidad_vendida)
+                    {
+                        return Json(null);
+                    }
+
+                    //asignamos nuevos valores
+                    item.cantidad_vendida = value.cantidad_vendida;
+                    producto.cantidad -= value.cantidad_vendida;
+
+                    //nuevo subtotal
+                    var subtotal = (item.cantidad_vendida * value.precio_unitario);
+                    item.subtotal = subtotal;
+
+                    //cambio en base de datos
+                    await _db.SaveChangesAsync();
+
+                    //sacar total
+                    var total = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).SumAsync(x => x.subtotal);
+
+                    //poner a venta el total
+                    var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_codigo == ventaId);
+                    venta.total = total;
+
+                    _db.SaveChangesAsync();
+
+                    var response = new
+                    {
+                        venta_detalle = item,
+                        ventaTotal = total
+                    };
+
+                    return Json(response);
+                }
+
+                return Json(null);
+
+            }
+            catch (Exception ex)
+            {
+                return Json(ex);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> _Modal_Eliminar_Producto(int id,int ventaId)
+        {
+            var producto = await _db.vw_venta_detalle.FirstOrDefaultAsync(x => x.PK_codigo == id);
+            ViewBag.ventaId = ventaId;
+            return PartialView(producto);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> EliminarProducto(int id, int ventaId)
+        {
+            try
+            {
+                if (id != 0)
+                {
+                    //Traemos el objecto de venta detalle
+                    var item = await _db.venta_detalle.FirstOrDefaultAsync(x => x.PK_codigo == id);
+
+                    //cambios en base de datos
+                    _db.venta_detalle.Remove(item);
+                    await _db.SaveChangesAsync();
+
+                    var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_codigo == ventaId);
+                    var venta_detalle = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).OrderByDescending(x => x.PK_codigo).ToListAsync();
+
+                    //sacar total a venta
+                    var sumSubtotal = venta_detalle.Sum(x => x.subtotal);
+                    venta.total = sumSubtotal;
+
+                    await _db.SaveChangesAsync();
+                    var response = new
+                    {
+                        productosDetalle = venta_detalle,
+                        ventaTotal = sumSubtotal,
+                    };
+
+                    return Json(response);
+                }
+                return Json(null);
+            }
+            catch (Exception ex)
+            {
+                return Json(ex);
+            }
         }
     }
 }

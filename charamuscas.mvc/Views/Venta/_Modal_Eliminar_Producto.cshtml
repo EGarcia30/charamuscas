@@ -1,0 +1,22 @@
+﻿@model charamuscas.entities.Entities.vw_venta_detalle
+@{
+    int ventaId = ViewBag.ventaId;
+}
+<div class="modal-content">
+    <div class="modal-header bg-danger">
+        <h5 class="modal-title text-light" id="confirmModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-light" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body text-center">
+        <i class="fas fa-exclamation-triangle fs-1 text-danger mb-2"></i>
+        <p class="mb-0">Estas seguro de eliminar este item?<br>esta acción no puede revertirse.</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" onclick="eliminarProducto(@(Model.PK_codigo),@(ventaId))">
+            <i class="fas fa-trash-alt me-2"></i>Eliminar
+        </button>
+    </div>
+</div>
