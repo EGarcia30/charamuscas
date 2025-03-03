@@ -60,7 +60,7 @@
         </div>
     </div>
     <!--Tabla-->
-    <div id="ventaDetalle" class="table-responsive">
+    <div id="ventaDetalle" class="table-responsive h-100">
         <table class="table">
             <thead>
                 <tr>
@@ -344,9 +344,14 @@
 
             $.post(_url, data).done(function (res) {  
                 $('#agregar-producto-modal').modal('hide');
-                $('#total').html(formatCurrency(res.ventaTotal));
-                crearTablaDetalle(res.productosDetalle);
+                if (res != null) {
+                    $('#total').html(formatCurrency(res.ventaTotal));
+                    crearTablaDetalle(res.productosDetalle);
 
+                    var tr = document.getElementById(`${res.inventario.pK_codigo}`);
+                    console.log(tr)
+                    tr.children[2].textContent = formatNumber(res.inventario.cantidad);
+                }
             }).fail(function (err) { console.log(err.responseText) })
         }
     </script>

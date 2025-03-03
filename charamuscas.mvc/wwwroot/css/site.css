@@ -1,5 +1,5 @@
 .nav-footer{
-    position:absolute;
+    position:fixed;
     bottom:40px;
     left:40px;
 }
