@@ -1,4 +1,5 @@
 ﻿using charamuscas.entities.Entities;
+using charamuscas.mvc.Helper;
 using charamuscas.services.Contextos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,8 +16,9 @@ namespace charamuscas.mvc.Controllers
             _db = db;
         }
         // GET: InventarioController
-        public async Task<ActionResult> Index(string search)
+        public async Task<ActionResult> Index(string search, int? numPag)
         {
+            int cantidadRegistros = 6;
             //busqueda por filtro
             if (!String.IsNullOrEmpty(search))
             {
@@ -29,7 +31,7 @@ namespace charamuscas.mvc.Controllers
 
             //todos los registros
             var inventario = await _db.vw_inventario.OrderByDescending(x => x.PK_codigo).ToListAsync();
-            return View(inventario);
+            return View(Paginacion<vw_inventario>.CrearPaginacion(inventario.AsQueryable(), numPag ?? 1, cantidadRegistros));
         }
 
         // GET: InventarioController/Details/5

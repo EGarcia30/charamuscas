@@ -1,4 +1,5 @@
 ﻿using charamuscas.entities.Entities;
+using charamuscas.mvc.Helper;
 using charamuscas.services.Contextos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +15,10 @@ namespace charamuscas.mvc.Controllers
             _db = db;
         }
         // GET: CompraController
-        public async Task<ActionResult> Index(string search)
+        public async Task<ActionResult> Index(string search, int? numPag)
         {
+            int cantidadRegistros = 6;
+
             if (!String.IsNullOrEmpty(search))
             {
                 var buscarCompra = await _db.compra.Where(x => x.nombre.Contains(search)).OrderByDescending(x => x.PK_codigo).ToListAsync();
@@ -23,7 +26,7 @@ namespace charamuscas.mvc.Controllers
             }
             var compras = await _db.compra.OrderByDescending(x => x.PK_codigo).Take(100).ToListAsync();
 
-            return View(compras);
+            return View(Paginacion<compra>.CrearPaginacion(compras.AsQueryable(), numPag ?? 1, cantidadRegistros));
         }
 
         public async Task<ActionResult> Details(int id)

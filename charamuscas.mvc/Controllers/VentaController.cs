@@ -1,4 +1,5 @@
 ﻿using charamuscas.entities.Entities;
+using charamuscas.mvc.Helper;
 using charamuscas.services.Contextos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,8 +17,9 @@ namespace charamuscas.mvc.Controllers
         }
 
         // GET: VentaController
-        public async Task<ActionResult> Index(string search)
+        public async Task<ActionResult> Index(string search, int? numPag)
         {
+            int cantidadRegistros = 6;
             //busqueda por filtro
             if (!String.IsNullOrEmpty(search))
             {
@@ -30,7 +32,7 @@ namespace charamuscas.mvc.Controllers
 
             //todos los registros
             var venta = await _db.venta.OrderByDescending(x => x.PK_codigo).ToListAsync();
-            return View(venta);
+            return View(Paginacion<venta>.CrearPaginacion(venta.AsQueryable(), numPag ?? 1, cantidadRegistros));
         }
 
         public ActionResult Create()
@@ -62,10 +64,12 @@ namespace charamuscas.mvc.Controllers
         }
 
         // GET: VentaController/Details/5
-        public async Task<ActionResult> Details(Guid id)
+        public async Task<ActionResult> Details(Guid id, int? numPag)
         {
+            int cantidadRegistros = 6;
             var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_hash == id);
-            ViewBag.venta_detalle = await _db.vw_venta_detalle.Where(x => x.FK_venta == venta.PK_codigo).OrderByDescending(x => x.PK_codigo).ToListAsync();
+            var venta_detalle = await _db.vw_venta_detalle.Where(x => x.FK_venta == venta.PK_codigo).OrderByDescending(x => x.PK_codigo).ToListAsync();
+            ViewBag.paginacion_venta_detalle = Paginacion<vw_venta_detalle>.CrearPaginacion(venta_detalle.AsQueryable(), numPag ?? 1, cantidadRegistros);
             return View(venta);
         }
 

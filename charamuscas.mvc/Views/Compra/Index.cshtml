@@ -1,4 +1,6 @@
-﻿@model List<charamuscas.entities.Entities.compra>
+﻿@using charamuscas.entities.Entities
+@using charamuscas.mvc.Helper
+@model Paginacion<compra>
 @{
     ViewData["Title"] = "Compras";
 }
@@ -50,6 +52,35 @@
             </tbody>
         </table>
     </div>
+</div>
+
+
+<!--Paginacion-->
+@{
+    var anteriorDeshabilitado = !Model.PaginasAnteriores ? "disabled" : "";
+    var posterioresDeshabilitado = !Model.PaginasPosteriores ? "disabled" : "";
+}
+
+<div class="container">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item @anteriorDeshabilitado">
+                <a class="page-link" asp-action="Index" asp-route-numPag="@(Model.PaginaInicio - 1)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (var i = 1; i <= Model.PaginasTotales; i++)
+            {
+                var paginaActiva = (i == Model.PaginaInicio) ? "active" : "";
+                <li class="page-item @paginaActiva"><a class="page-link" asp-action="Index" asp-route-numPag="@(i)">@(i)</a></li>
+            }
+            <li class="page-item @posterioresDeshabilitado">
+                <a class="page-link" asp-action="Index" asp-route-numPag="@(Model.PaginaInicio + 1)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 <div class="nav-footer">

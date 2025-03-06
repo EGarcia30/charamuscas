@@ -1,10 +1,11 @@
 ﻿@model charamuscas.entities.Entities.venta
 @using charamuscas.entities.Entities
+@using charamuscas.mvc.Helper
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    var ventaDetalle = (List<vw_venta_detalle>)ViewBag.venta_detalle;
+    var ventaDetalle = (Paginacion<vw_venta_detalle>)ViewBag.paginacion_venta_detalle;
     ViewData["Title"] = "Ventas";
 }
 <!--Encabezado-->
@@ -107,6 +108,35 @@
         </table>
     </div>
 </div>
+
+<!--Paginacion-->
+@{
+    var anteriorDeshabilitado = !ventaDetalle.PaginasAnteriores ? "disabled" : "";
+    var posterioresDeshabilitado = !ventaDetalle.PaginasPosteriores ? "disabled" : "";
+}
+
+<div class="container">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item @anteriorDeshabilitado">
+                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio - 1)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (var i = 1; i <= ventaDetalle.PaginasTotales; i++)
+            {
+                var paginaActiva = (i == ventaDetalle.PaginaInicio) ? "active" : "";
+                <li class="page-item @paginaActiva"><a class="page-link" asp-action="Details" asp-route-numPag="@(i)">@(i)</a></li>
+            }
+            <li class="page-item @posterioresDeshabilitado">
+                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio + 1)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
 
 <!--Modal de productos en vista parcial-->
 <div class="modal fade" id="productos-modal" tabindex="-1" role="dialog">
