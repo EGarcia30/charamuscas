@@ -36,7 +36,7 @@
 </div>
 
 <!--Tabla de detalle-->
-<div class="container mt-5">
+<div class="container my-5">
     <!--Sub-Menu-->
     <div class="d-flex flex-row-reverse mb-3">
         <div class="d-flex justify-content-between w-100">
@@ -61,7 +61,7 @@
         </div>
     </div>
     <!--Tabla-->
-    <div id="ventaDetalle" class="table-responsive">
+    <div id="ventaDetalle" class="table-responsive" style="height: 350px">
         <table class="table">
             <thead>
                 <tr>
@@ -374,9 +374,14 @@
 
             $.post(_url, data).done(function (res) {  
                 $('#agregar-producto-modal').modal('hide');
-                $('#total').html(formatCurrency(res.ventaTotal));
-                crearTablaDetalle(res.productosDetalle);
+                if (res != null) {
+                    $('#total').html(formatCurrency(res.ventaTotal));
+                    crearTablaDetalle(res.productosDetalle);
 
+                    var tr = document.getElementById(`${res.inventario.pK_codigo}`);
+                    console.log(tr)
+                    tr.children[2].textContent = formatNumber(res.inventario.cantidad);
+                }
             }).fail(function (err) { console.log(err.responseText) })
         }
     </script>

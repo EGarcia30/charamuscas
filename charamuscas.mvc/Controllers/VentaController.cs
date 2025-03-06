@@ -147,7 +147,7 @@ namespace charamuscas.mvc.Controllers
                     {
                         productosDetalle = productos,
                         ventaTotal = ventaDB.total,
-                        inventarioCantidad = inventarioDB.cantidad,
+                        inventario = inventarioDB,
                     };
 
                     return Json(response);
