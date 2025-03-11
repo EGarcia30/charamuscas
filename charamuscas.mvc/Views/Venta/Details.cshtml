@@ -6,6 +6,7 @@
 *@
 @{
     var ventaDetalle = (Paginacion<vw_venta_detalle>)ViewBag.paginacion_venta_detalle;
+    var busqueda = ViewBag.busqueda;
     ViewData["Title"] = "Ventas";
 }
 <!--Encabezado-->
@@ -36,7 +37,7 @@
 </div>
 
 <!--Tabla de detalle-->
-<div class="container my-5">
+<div class="container">
     <!--Sub-Menu-->
     <div class="d-flex flex-row-reverse mb-3">
         <div class="d-flex justify-content-between w-100">
@@ -52,6 +53,7 @@
                        name="search"
                        id="search"
                        placeholder="Buscar"
+                       value="@ViewData["busqueda"]"
                        class="form-control me-1" 
                        onkeyup="buscarVentaDetalle()"/>
                 <button type="button" onclick="buscarVentaDetalle()" class="btn btn-dark">
@@ -61,7 +63,7 @@
         </div>
     </div>
     <!--Tabla-->
-    <div id="ventaDetalle" class="table-responsive" style="height: 350px">
+    <div id="ventaDetalle" class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
@@ -115,21 +117,21 @@
     var posterioresDeshabilitado = !ventaDetalle.PaginasPosteriores ? "disabled" : "";
 }
 
-<div class="container">
+<div class="container mb-4 pb-5">
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             <li class="page-item @anteriorDeshabilitado">
-                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio - 1)" aria-label="Previous">
+                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio - 1)" asp-route-search="@(busqueda)" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             @for (var i = 1; i <= ventaDetalle.PaginasTotales; i++)
             {
                 var paginaActiva = (i == ventaDetalle.PaginaInicio) ? "active" : "";
-                <li class="page-item @paginaActiva"><a class="page-link" asp-action="Details" asp-route-numPag="@(i)">@(i)</a></li>
+                <li class="page-item @paginaActiva"><a class="page-link" asp-action="Details" asp-route-numPag="@(i)" asp-route-search="@(busqueda)">@(i)</a></li>
             }
             <li class="page-item @posterioresDeshabilitado">
-                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio + 1)" aria-label="Next">
+                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio + 1)" asp-route-search="@(busqueda)" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -149,7 +151,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
     </div>
 </div>
-
+   
 <!--Modal de eliminar producto en vista parcial-->
 <div class="modal fade" id="eliminar-producto-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -165,45 +167,9 @@
 </div>
 
 @section Scripts{
-    <!--Funciones de buscador-->
+
+    <!--Funciones de venta detalle-->
     <script>
-        //Mostrar productos vendidos en esa venta
-        function buscarVentaDetalle() {
-            var data = {
-                ventaId: @Model.PK_codigo,
-                search: $('#search').val()
-            }
-            var _url = '@Url.Action("buscarVentaDetalle", "Venta")';
-
-            $.post(_url,data).done(function(res){
-                crearTablaDetalle(res);
-            }).fail(function (err) { console.log(err.responseText) })
-        }
-
-        // Funciones auxiliares para formatear moneda y número
-        function formatCurrency(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                style: 'currency',
-                currency: 'MXN' // Ajusta la moneda si es necesario
-            }).format(number);
-        }
-
-        function formatNumber(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(number);
-        }
-
-        // Función para calcular el total a partir del jsonData
-        function calcularTotal(jsonData) {
-            let total = 0;
-            jsonData.forEach(item => {
-                total += item.subtotal;
-            });
-            return total;
-        }
-
         function crearTablaDetalle(res) {
             //cuerpo de la tabla
             const cuerpoTabla = document.querySelector('#ventaDetalle tbody');
@@ -264,7 +230,6 @@
                 fila.appendChild(celdaEliminar);
                 //agregar fila al cuerpo de la tabla
                 cuerpoTabla.appendChild(fila)
-                console.log(item)
             });
 
             // Crear la fila del total
@@ -294,7 +259,117 @@
 
             cuerpoTabla.appendChild(filaTotal);
         }
-        
+    </script>
+
+    <!--Funciones de paginacion-->
+    <script>
+        function actualizarPaginacionBusqueda(paginasTotales, paginaInicio, busqueda) {
+            var anteriorDeshabilitado = (paginaInicio === 1) ? "disabled" : "";
+            var posterioresDeshabilitado = (paginaInicio === paginasTotales) ? "disabled" : "";
+
+            var baseUrl = '@Url.Action("Details", "Venta")';
+
+            var paginationHtml = `
+                <li class="page-item ${anteriorDeshabilitado}">
+                    <a class="page-link" href="${baseUrl}?numPag=${paginaInicio - 1}&search=${busqueda}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>`;
+
+            for (var i = 1; i <= paginasTotales; i++) {
+                var paginaActiva = (i === paginaInicio) ? "active" : "";
+                paginationHtml += `
+                    <li class="page-item ${paginaActiva}">
+                        <a class="page-link" href="${baseUrl}?numPag=${i}&search=${busqueda}">${i}</a>
+                    </li>`;
+            }
+
+            paginationHtml += `
+                <li class="page-item ${posterioresDeshabilitado}">
+                    <a class="page-link" href="${baseUrl}?numPag=${paginaInicio + 1}&search=${busqueda}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>`;
+
+            $('.pagination').html(paginationHtml);
+        }
+
+        function actualizarPaginacion(paginasTotales, paginaInicio) {
+            var anteriorDeshabilitado = (paginaInicio === 1) ? "disabled" : "";
+            var posterioresDeshabilitado = (paginaInicio === paginasTotales) ? "disabled" : "";
+
+            var baseUrl = '@Url.Action("Details", "Venta")';
+
+            var paginationHtml = `
+                        <li class="page-item ${anteriorDeshabilitado}">
+                            <a class="page-link" href="${baseUrl}?numPag=${paginaInicio - 1}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>`;
+
+            for (var i = 1; i <= paginasTotales; i++) {
+                var paginaActiva = (i === paginaInicio) ? "active" : "";
+                paginationHtml += `
+                            <li class="page-item ${paginaActiva}">
+                                <a class="page-link" href="${baseUrl}?numPag=${i}">${i}</a>
+                            </li>`;
+            }
+
+            paginationHtml += `
+                        <li class="page-item ${posterioresDeshabilitado}">
+                            <a class="page-link" href="${baseUrl}?numPag=${paginaInicio + 1}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>`;
+
+            $('.pagination').html(paginationHtml);
+        }
+    </script>
+
+    <!--Funciones de buscador-->
+    <script>
+        //Mostrar productos vendidos en esa venta
+        function buscarVentaDetalle() {
+            var data = {
+                ventaId: @Model.PK_codigo,
+                search: $('#search').val(),
+                numPag: @ventaDetalle.PaginaInicio
+            }
+            var _url = '@Url.Action("buscarVentaDetalle", "Venta")';
+
+            $.post(_url,data).done(function(res){
+                //refrescar tabla de productos(venta_detalle)
+                crearTablaDetalle(res.productosDetalle)
+                let busqueda = res.busqueda;
+                //refrescar paginacion
+                actualizarPaginacionBusqueda(res.paginasTotales, res.paginaInicio, busqueda)
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+
+        // Funciones auxiliares para formatear moneda y número
+        function formatCurrency(number) {
+            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
+                style: 'currency',
+                currency: 'MXN' // Ajusta la moneda si es necesario
+            }).format(number);
+        }
+
+        function formatNumber(number) {
+            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(number);
+        }
+
+        // Función para calcular el total a partir del jsonData
+        function calcularTotal(jsonData) {
+            let total = 0;
+            jsonData.forEach(item => {
+                total += item.subtotal;
+            });
+            return total;
+        }
+
     </script>
 
     <!--Funcion de mostrar modal de productos-->
@@ -368,19 +443,24 @@
                 ventaId: @Model.PK_codigo,
                 PK_codigo: $('#PK_codigo').val(),
                 cantidad: $('#cantidad').val(),
-                precio_unitario: $('#precio_unitario').val()
+                precio_unitario: $('#precio_unitario').val(),
             }
             var _url = '@Url.Action("AgregarProductoDetalle", "Venta")';
 
             $.post(_url, data).done(function (res) {  
                 $('#agregar-producto-modal').modal('hide');
                 if (res != null) {
+                    //Actualizar total de la venta
                     $('#total').html(formatCurrency(res.ventaTotal));
+                    //refrescar la tabla del detalle de venta
                     crearTablaDetalle(res.productosDetalle);
 
+                    //refrescar los productos que quedan disponibles en inventario
                     var tr = document.getElementById(`${res.inventario.pK_codigo}`);
-                    console.log(tr)
                     tr.children[2].textContent = formatNumber(res.inventario.cantidad);
+
+                    //refrescar paginacion
+                    actualizarPaginacion(res.paginasTotales, res.paginaInicio);
                 }
             }).fail(function (err) { console.log(err.responseText) })
         }
@@ -414,7 +494,9 @@
             $.post(_url, data).done(function (res) {
                 $('#editar-producto-modal').modal('hide');
                 if (res != null) {
+                    //refrescar total de venta.
                     $('#total').html(formatCurrency(res.ventaTotal));
+                    //refrescar precio_venta, cantidad_vendida, subtotal en venta detalle.
                     var tr = document.getElementById(`${res.venta_detalle.pK_codigo}`);
                     tr.children[3].textContent = formatCurrency(res.venta_detalle.precio_venta);
                     tr.children[4].textContent = formatNumber(res.venta_detalle.cantidad_vendida);
@@ -444,14 +526,20 @@
         function eliminarProducto(id,ventaId) {
             var data = {
                 id: id,
-                ventaId: ventaId
+                ventaId: ventaId,
             }
             var _url = '@Url.Action("EliminarProducto", "Venta")';
             $.post(_url, data).done(function (res) {
                 $('#eliminar-producto-modal').modal('hide');
                 if(res != null){
+                    //refrescar total
                     $('#total').html(formatCurrency(res.ventaTotal));
+
+                    //refrescar productos(venta_detalle)
                     crearTablaDetalle(res.productosDetalle);
+
+                    //refrescar paginacion
+                    actualizarPaginacion(res.paginasTotales, res.paginaInicio);
                 }
             }).fail(function (err) { console.log(err.responseText) })
         }

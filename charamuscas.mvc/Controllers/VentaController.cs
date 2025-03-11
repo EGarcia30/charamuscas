@@ -27,7 +27,8 @@ namespace charamuscas.mvc.Controllers
                     .Where(x => x.PK_codigo.ToString().Contains(search) || x.PK_hash.ToString().Contains(search) || x.total.ToString().Contains(search))
                     .OrderByDescending(x => x.PK_codigo)
                     .ToListAsync();
-                return View(buscarVenta);
+
+                return View(Paginacion<venta>.CrearPaginacion(buscarVenta.AsQueryable(), numPag ?? 1, cantidadRegistros));
             }
 
             //todos los registros
@@ -64,30 +65,62 @@ namespace charamuscas.mvc.Controllers
         }
 
         // GET: VentaController/Details/5
-        public async Task<ActionResult> Details(Guid id, int? numPag)
+        public async Task<ActionResult> Details(Guid id, int? numPag, string? search)
         {
             int cantidadRegistros = 6;
             var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_hash == id);
+            ViewBag.busqueda = "";
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                ViewBag.busqueda = search;
+                var venta_detalleFiltrado = await _db.vw_venta_detalle.Where(x => x.FK_venta == venta.PK_codigo && (x.categoria.Contains(search) || x.producto.Contains(search))).OrderByDescending(x => x.PK_codigo).ToListAsync();
+                ViewBag.paginacion_venta_detalle = Paginacion<vw_venta_detalle>.CrearPaginacion(venta_detalleFiltrado.AsQueryable(), numPag ?? 1, cantidadRegistros);
+                return View(venta);
+            }
+
             var venta_detalle = await _db.vw_venta_detalle.Where(x => x.FK_venta == venta.PK_codigo).OrderByDescending(x => x.PK_codigo).ToListAsync();
             ViewBag.paginacion_venta_detalle = Paginacion<vw_venta_detalle>.CrearPaginacion(venta_detalle.AsQueryable(), numPag ?? 1, cantidadRegistros);
             return View(venta);
         }
 
         [HttpPost]
-        public async Task<JsonResult> buscarVentaDetalle(int ventaId, string search)
+        public async Task<JsonResult> buscarVentaDetalle(int ventaId, string search, int? numPag)
         {
+            int cantidadRegistros = 6;
             if (!string.IsNullOrEmpty(search))
             {
+                numPag = 1;
                 var ventaDetalleFiltrado = await _db.vw_venta_detalle
                 .Where(x => x.FK_venta == ventaId && (x.categoria.Contains(search) || x.producto.Contains(search))).OrderByDescending(x => x.PK_codigo).ToListAsync();
 
-                return Json(ventaDetalleFiltrado);
+                var productosPagSearch = Paginacion<vw_venta_detalle>.CrearPaginacion(ventaDetalleFiltrado.AsQueryable(), numPag ?? 1, cantidadRegistros);
+
+                var responseSearch = new
+                {
+                    productosDetalle = productosPagSearch,
+                    paginaInicio = productosPagSearch.PaginaInicio,
+                    paginasTotales = productosPagSearch.PaginasTotales,
+                    busqueda = search,
+                };
+
+                return Json(responseSearch);
             }
-            
+
             var ventaDetalle = await _db.vw_venta_detalle
                 .Where(x => x.FK_venta == ventaId).OrderByDescending(x => x.PK_codigo).ToListAsync();
 
-            return Json(ventaDetalle);
+            var productosPag = Paginacion<vw_venta_detalle>.CrearPaginacion(ventaDetalle.AsQueryable(), numPag ?? 1, cantidadRegistros);
+
+            var response = new
+            {
+                productosDetalle = productosPag,
+                paginaInicio = productosPag.PaginaInicio,
+                paginasTotales = productosPag.PaginasTotales,
+                busqueda = "",
+            };
+
+            return Json(response);
         }
 
         [HttpPost]
@@ -105,7 +138,7 @@ namespace charamuscas.mvc.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> AgregarProductoDetalle(vw_inventario inventario, int ventaId)
+        public async Task<JsonResult> AgregarProductoDetalle(vw_inventario inventario, int ventaId, int? numPag)
         {
             try
             {
@@ -142,13 +175,18 @@ namespace charamuscas.mvc.Controllers
 
                     //Todos los datos de la tabla venta detalle
                     var productos = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).OrderByDescending(x => x.PK_codigo).ToListAsync();
+                    int cantidadRegistros = 6;
+                    var productosPag = Paginacion<vw_venta_detalle>.CrearPaginacion(productos.AsQueryable(), numPag ?? 1, cantidadRegistros);
 
                     var response = new
                     {
-                        productosDetalle = productos,
+                        paginasTotales = productosPag.PaginasTotales,
+                        paginaInicio = productosPag.PaginaInicio,
+                        productosDetalle = productosPag,
                         ventaTotal = ventaDB.total,
                         inventario = inventarioDB,
                     };
+
 
                     return Json(response);
                 }
@@ -175,7 +213,7 @@ namespace charamuscas.mvc.Controllers
                 {
                     //Traemos el objecto de venta detalle
                     var item = await _db.venta_detalle.FirstOrDefaultAsync(x => x.PK_codigo == value.PK_codigo);
-                    //traemos el iventario(producto)
+                    //traemos el inventario(producto)
                     var producto = await _db.inventario.FirstOrDefaultAsync(x => x.PK_codigo == item.FK_inventario);
 
                     //Se regresan los productos comprados a mi inventario
@@ -235,7 +273,7 @@ namespace charamuscas.mvc.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> EliminarProducto(int id, int ventaId)
+        public async Task<JsonResult> EliminarProducto(int id, int ventaId, int? numPag)
         {
             try
             {
@@ -248,17 +286,24 @@ namespace charamuscas.mvc.Controllers
                     _db.venta_detalle.Remove(item);
                     await _db.SaveChangesAsync();
 
+                    //traer venta y productos(venta_detalle)
                     var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_codigo == ventaId);
-                    var venta_detalle = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).OrderByDescending(x => x.PK_codigo).ToListAsync();
+                    var productos = await _db.vw_venta_detalle.Where(x => x.FK_venta == ventaId).OrderByDescending(x => x.PK_codigo).ToListAsync();
+
+                    //productos(venta_detalle) con paginacion
+                    int cantidadRegistros = 6;
+                    var productosPag = Paginacion<vw_venta_detalle>.CrearPaginacion(productos.AsQueryable(), numPag ?? 1, cantidadRegistros);
 
                     //sacar total a venta
-                    var sumSubtotal = venta_detalle.Sum(x => x.subtotal);
+                    var sumSubtotal = productos.Sum(x => x.subtotal);
                     venta.total = sumSubtotal;
 
                     await _db.SaveChangesAsync();
                     var response = new
                     {
-                        productosDetalle = venta_detalle,
+                        paginasTotales = productosPag.PaginasTotales,
+                        paginaInicio = productosPag.PaginaInicio,
+                        productosDetalle = productosPag,
                         ventaTotal = sumSubtotal,
                     };
 
