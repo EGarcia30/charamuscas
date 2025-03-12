@@ -18,5 +18,6 @@ namespace charamuscas.entities.Entities
         public int FK_categoria { get; set; }
         public string categoria { get; set; }
         public decimal costo_unitario { get; set; }
+        public DateTime fecha_creacion { get; set; }
     }
 }

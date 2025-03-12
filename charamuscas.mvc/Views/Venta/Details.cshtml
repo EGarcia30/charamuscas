@@ -121,17 +121,17 @@
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             <li class="page-item @anteriorDeshabilitado">
-                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio - 1)" asp-route-search="@(busqueda)" aria-label="Previous">
+                <a class="page-link" onclick="buscarVentaDetalle(@(ventaDetalle.PaginaInicio - 1))" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             @for (var i = 1; i <= ventaDetalle.PaginasTotales; i++)
             {
                 var paginaActiva = (i == ventaDetalle.PaginaInicio) ? "active" : "";
-                <li class="page-item @paginaActiva"><a class="page-link" asp-action="Details" asp-route-numPag="@(i)" asp-route-search="@(busqueda)">@(i)</a></li>
+                <li class="page-item @paginaActiva"><a class="page-link" onclick="buscarVentaDetalle(@(i))" >@(i)</a></li>
             }
             <li class="page-item @posterioresDeshabilitado">
-                <a class="page-link" asp-action="Details" asp-route-numPag="@(ventaDetalle.PaginaInicio + 1)" asp-route-search="@(busqueda)" aria-label="Next">
+                <a class="page-link" onclick="buscarVentaDetalle(@(ventaDetalle.PaginaInicio + 1))" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -263,37 +263,6 @@
 
     <!--Funciones de paginacion-->
     <script>
-        function actualizarPaginacionBusqueda(paginasTotales, paginaInicio, busqueda) {
-            var anteriorDeshabilitado = (paginaInicio === 1) ? "disabled" : "";
-            var posterioresDeshabilitado = (paginaInicio === paginasTotales) ? "disabled" : "";
-
-            var baseUrl = '@Url.Action("Details", "Venta")';
-
-            var paginationHtml = `
-                <li class="page-item ${anteriorDeshabilitado}">
-                    <a class="page-link" href="${baseUrl}?numPag=${paginaInicio - 1}&search=${busqueda}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>`;
-
-            for (var i = 1; i <= paginasTotales; i++) {
-                var paginaActiva = (i === paginaInicio) ? "active" : "";
-                paginationHtml += `
-                    <li class="page-item ${paginaActiva}">
-                        <a class="page-link" href="${baseUrl}?numPag=${i}&search=${busqueda}">${i}</a>
-                    </li>`;
-            }
-
-            paginationHtml += `
-                <li class="page-item ${posterioresDeshabilitado}">
-                    <a class="page-link" href="${baseUrl}?numPag=${paginaInicio + 1}&search=${busqueda}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>`;
-
-            $('.pagination').html(paginationHtml);
-        }
-
         function actualizarPaginacion(paginasTotales, paginaInicio) {
             var anteriorDeshabilitado = (paginaInicio === 1) ? "disabled" : "";
             var posterioresDeshabilitado = (paginaInicio === paginasTotales) ? "disabled" : "";
@@ -302,7 +271,7 @@
 
             var paginationHtml = `
                         <li class="page-item ${anteriorDeshabilitado}">
-                            <a class="page-link" href="${baseUrl}?numPag=${paginaInicio - 1}" aria-label="Previous">
+                            <a class="page-link" onclick="buscarVentaDetalle(${paginaInicio - 1})" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>`;
@@ -311,13 +280,13 @@
                 var paginaActiva = (i === paginaInicio) ? "active" : "";
                 paginationHtml += `
                             <li class="page-item ${paginaActiva}">
-                                <a class="page-link" href="${baseUrl}?numPag=${i}">${i}</a>
+                                <a class="page-link" onclick="buscarVentaDetalle(${i})">${i}</a>
                             </li>`;
             }
 
             paginationHtml += `
                         <li class="page-item ${posterioresDeshabilitado}">
-                            <a class="page-link" href="${baseUrl}?numPag=${paginaInicio + 1}" aria-label="Next">
+                            <a class="page-link" onclick="buscarVentaDetalle(${paginaInicio + 1})" aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>`;
@@ -329,20 +298,20 @@
     <!--Funciones de buscador-->
     <script>
         //Mostrar productos vendidos en esa venta
-        function buscarVentaDetalle() {
+        function buscarVentaDetalle(pagina) {
             var data = {
                 ventaId: @Model.PK_codigo,
                 search: $('#search').val(),
-                numPag: @ventaDetalle.PaginaInicio
+                numPag: pagina
             }
             var _url = '@Url.Action("buscarVentaDetalle", "Venta")';
 
             $.post(_url,data).done(function(res){
                 //refrescar tabla de productos(venta_detalle)
                 crearTablaDetalle(res.productosDetalle)
-                let busqueda = res.busqueda;
+                console.log(res.paginaInicio);
                 //refrescar paginacion
-                actualizarPaginacionBusqueda(res.paginasTotales, res.paginaInicio, busqueda)
+                actualizarPaginacion(res.paginasTotales, res.paginaInicio)
             }).fail(function (err) { console.log(err.responseText) })
         }
 
@@ -403,6 +372,7 @@
             $.post(_url, data).done(function (res) {
                 $('#agregar-producto-modal .modal-dialog').html(res);
                 $('#agregar-producto-modal').modal('show');
+                $('#search').val('');
             }).fail(function (err) { console.log(err.responseText) })
         }
     </script>
@@ -477,6 +447,7 @@
             $.post(_url, data).done(function (res) {
                 $('#editar-producto-modal .modal-dialog').html(res);
                 $('#editar-producto-modal').modal('show');
+                $('#search').val('');
             }).fail(function (err) { console.log(err.responseText) })
         }
     </script>
@@ -518,6 +489,7 @@
             $.post(_url, data).done(function (res) {
                 $('#eliminar-producto-modal .modal-dialog').html(res);
                 $('#eliminar-producto-modal').modal('show');
+                $('#search').val('');
             }).fail(function (err) { console.log(err.responseText) })
         }
     </script>

@@ -65,19 +65,10 @@ namespace charamuscas.mvc.Controllers
         }
 
         // GET: VentaController/Details/5
-        public async Task<ActionResult> Details(Guid id, int? numPag, string? search)
+        public async Task<ActionResult> Details(Guid id, int? numPag)
         {
             int cantidadRegistros = 6;
             var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_hash == id);
-            ViewBag.busqueda = "";
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                ViewBag.busqueda = search;
-                var venta_detalleFiltrado = await _db.vw_venta_detalle.Where(x => x.FK_venta == venta.PK_codigo && (x.categoria.Contains(search) || x.producto.Contains(search))).OrderByDescending(x => x.PK_codigo).ToListAsync();
-                ViewBag.paginacion_venta_detalle = Paginacion<vw_venta_detalle>.CrearPaginacion(venta_detalleFiltrado.AsQueryable(), numPag ?? 1, cantidadRegistros);
-                return View(venta);
-            }
 
             var venta_detalle = await _db.vw_venta_detalle.Where(x => x.FK_venta == venta.PK_codigo).OrderByDescending(x => x.PK_codigo).ToListAsync();
             ViewBag.paginacion_venta_detalle = Paginacion<vw_venta_detalle>.CrearPaginacion(venta_detalle.AsQueryable(), numPag ?? 1, cantidadRegistros);
@@ -90,7 +81,6 @@ namespace charamuscas.mvc.Controllers
             int cantidadRegistros = 6;
             if (!string.IsNullOrEmpty(search))
             {
-                numPag = 1;
                 var ventaDetalleFiltrado = await _db.vw_venta_detalle
                 .Where(x => x.FK_venta == ventaId && (x.categoria.Contains(search) || x.producto.Contains(search))).OrderByDescending(x => x.PK_codigo).ToListAsync();
 
@@ -101,7 +91,6 @@ namespace charamuscas.mvc.Controllers
                     productosDetalle = productosPagSearch,
                     paginaInicio = productosPagSearch.PaginaInicio,
                     paginasTotales = productosPagSearch.PaginasTotales,
-                    busqueda = search,
                 };
 
                 return Json(responseSearch);
@@ -117,7 +106,6 @@ namespace charamuscas.mvc.Controllers
                 productosDetalle = productosPag,
                 paginaInicio = productosPag.PaginaInicio,
                 paginasTotales = productosPag.PaginasTotales,
-                busqueda = "",
             };
 
             return Json(response);

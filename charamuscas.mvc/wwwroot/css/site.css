@@ -3,3 +3,22 @@
     bottom:40px;
     left:40px;
 }
+
+.bento-item {
+    height: 200px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+    .bento-item:hover {
+        transform: scale(1.05);
+    }
+
+.bento-tall {
+    height: 410px;
+}
