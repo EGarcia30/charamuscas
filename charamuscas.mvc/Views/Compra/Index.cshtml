@@ -32,6 +32,7 @@
                     <th scope="col">Producto</th>
                     <th scope="col">Cantidad</th>
                     <th scope="col">Costo Total</th>
+                    <th scope="col">Fecha de Compra</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,11 +44,14 @@
                         <td>@item.nombre</td>
                         <td>@(item.cantidad.ToString("N2"))</td>
                         <td>@(item.costo_total.ToString("C2"))</td>
+                        <td>@(item.fecha_compra)</td>
                     </tr>
                 }
                 <tr>
-                    <td colspan="3"></td>
+                    <td colspan="2"></td>
+                    <td class="fw-bold">Total</td>
                     <td>@(Model.Sum(x => x.costo_total).ToString("C2"))</td>
+                    <td colspan="1"></td>
                 </tr>
             </tbody>
         </table>

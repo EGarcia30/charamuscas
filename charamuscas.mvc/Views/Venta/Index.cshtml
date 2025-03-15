@@ -54,6 +54,12 @@
                         <td>@(item.fecha_hora)</td>
                     </tr>
                 }
+                <tr>
+                    <td colspan="1"></td>
+                    <td class="fw-bold">Total</td>
+                    <td>@(Model.Sum(x => x.total).ToString("C2"))</td>
+                    <td colspan="1"></td>
+                </tr>
             </tbody>
         </table>
     </div>
