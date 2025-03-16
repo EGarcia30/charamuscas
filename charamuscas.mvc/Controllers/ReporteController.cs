@@ -2,6 +2,7 @@
 using charamuscas.services.Contextos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace charamuscas.mvc.Controllers
 {
@@ -33,7 +34,7 @@ namespace charamuscas.mvc.Controllers
                 }
 
                 //utilidad bruta
-                var gananciasMes = ventaDetalleMes.Sum(x => (x.subtotal - x.costo_unitario));
+                var gananciasMes = ventaDetalleMes.Sum(x => (x.subtotal - (x.cantidad_vendida * x.costo_unitario)));
 
                 //margen de ganancias del mes
                 var margenGananciasMes = (gananciasMes / ventasTotalMes);
@@ -59,31 +60,42 @@ namespace charamuscas.mvc.Controllers
             try
             {
                 // Agrupar y sumar las ventas por mes
-                var ventasPorMes = await _db.venta
-                    .Where(x => x.fecha_hora.Year == DateTime.Now.Year)
-                    .GroupBy(x => x.fecha_hora.Month)
-                    .Select(g => new { Mes = g.Key, TotalVentas = g.Sum(v => v.total) }) // Asumiendo que 'total' es el campo que contiene el valor de la venta
-                    .ToListAsync();
-
-                // Agrupar y sumar las compras por mes
-                var comprasPorMes = await _db.compra
-                    .Where(x => x.fecha_compra.Year == DateTime.Now.Year)
-                    .GroupBy(x => x.fecha_compra.Month)
-                    .Select(g => new { Mes = g.Key, TotalCompras = g.Sum(c => c.costo_total) }) // Asumiendo que 'monto' es el campo que contiene el valor de la compra
-                    .ToListAsync();
-                //var ventas = await _db.venta.GroupBy(x => x.fecha_hora.Month).ToListAsync();
-                //var compras = await _db.compra.GroupBy(x => x.fecha_compra.Month).ToListAsync();
+                var ventasDelMes = await _db.venta
+                .Where(x => x.fecha_hora.Year == DateTime.Now.Year)
+                .GroupBy(x => x.fecha_hora.Month)
+                .Select(g => new {
+                    Mes = g.Key,
+                }) // Asumiendo que 'total' es el campo que contiene el valor de la venta
+                .ToListAsync();
 
                 // Inicializar un arreglo para las ganancias
-                decimal[] ganancia = new decimal[12]; // Para los 12 meses del año
-                string[] mes = new string[] {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+                List<decimal> ganancia = new List<decimal>(); // Para los 12 meses del año
+                List<string> mes = new List<string>();
 
-                for (var i = 1; i <= 12; i++)
+                //sacar utilidad neta de cada mes que se hicieron gastos en la empresa
+                foreach (var item in ventasDelMes)
                 {
-                    var totalVentas = ventasPorMes.FirstOrDefault(v => v.Mes == i)?.TotalVentas ?? 0;
-                    var totalCompras = comprasPorMes.FirstOrDefault(c => c.Mes == i)?.TotalCompras ?? 0;                  
+                    //venta de ese mes
+                    var ventaMes = await _db.venta.Where(x => x.fecha_hora.Month == item.Mes).Select(x => new { PK_codigo = x.PK_codigo}).ToListAsync();
 
-                    ganancia[i - 1] = totalVentas - totalCompras; // Guardar la ganancia en el índice correspondiente
+                    //compras de ese mes
+                    var compraDelMes = await _db.compra.Where(x => x.fecha_compra.Month == item.Mes).SumAsync(x => x.costo_total);
+
+                    //inicializar total de $$ de ventas de ese mes
+                    var ventaDetalleMes = 0.00m;
+                    
+
+                    foreach (var itemVenta in ventaMes)
+                    {
+                        //sacar utilidad bruta de ese mes
+                        var utilidadBruta = await _db.vw_venta_detalle.Where(x => x.FK_venta == itemVenta.PK_codigo).SumAsync(x => (x.subtotal - (x.cantidad_vendida * x.costo_unitario)));                       
+                        ventaDetalleMes += utilidadBruta;
+                    }
+
+                    //ganancias utilidad neta en el mes que se realizo
+                    ganancia.Add(ventaDetalleMes - compraDelMes);
+                    DateTimeFormatInfo formatoFecha = CultureInfo.CurrentCulture.DateTimeFormat;
+                    mes.Add(formatoFecha.GetMonthName(item.Mes));
                 }
 
                 var response = new
@@ -100,7 +112,7 @@ namespace charamuscas.mvc.Controllers
             }
         }
 
-        public async Task<JsonResult> ProductosMasVendidos()
+        public async Task<JsonResult> CategoriasMasVendidas()
         {
             try
             {
@@ -114,14 +126,50 @@ namespace charamuscas.mvc.Controllers
                     .OrderByDescending(x => x.cantidad)
                     .Take(3)
                     .ToListAsync();
-                string[] nombreProductos = new string[3];
-                decimal[] cantidadProductos = new decimal[3];
-                int contador = 0;
+                List<string> nombreCategorias = new List<string>();
+                List<decimal> cantidadCategorias = new List<decimal>();
+
                 foreach (var item in productos)
                 {
-                    nombreProductos[contador] = item.categoria;
-                    cantidadProductos[contador] = item.cantidad;
-                    contador++;
+                    nombreCategorias.Add(item.categoria);
+                    cantidadCategorias.Add(item.cantidad);
+                }
+
+                var response = new
+                {
+                    nombre = nombreCategorias,
+                    cantidad = cantidadCategorias,
+                };
+
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                return Json(ex);
+            }
+        }
+
+        public async Task<JsonResult> ProductosMasVendidos()
+        {
+            try
+            {
+                var productos = await _db.vw_venta_detalle
+                    .GroupBy(x => x.producto)
+                    .Select(x => new
+                    {
+                        producto = x.Key,
+                        cantidad = x.Sum(z => z.cantidad_vendida)
+                    })
+                    .OrderByDescending(x => x.cantidad)
+                    .Take(3)
+                    .ToListAsync();
+                List<string> nombreProductos = new List<string>();
+                List<decimal> cantidadProductos = new List<decimal>();
+
+                foreach (var item in productos)
+                {
+                    nombreProductos.Add(item.producto);
+                    cantidadProductos.Add(item.cantidad);
                 }
 
                 var response = new
@@ -137,7 +185,5 @@ namespace charamuscas.mvc.Controllers
                 return Json(ex);
             }
         }
-
-
     }
 }

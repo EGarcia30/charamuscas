@@ -166,6 +166,8 @@
     <a asp-action="Edit" asp-controller="Venta" asp-route-id="@(Model.PK_hash)" class="btn btn-primary disabled"><i class="fas fa-pencil-alt"></i> <span class="d-md-inline-block d-none">Editar</span></a>
 </div>
 
+<script src="~/js/site.js"></script>
+
 @section Scripts{
 
     <!--Funciones de venta detalle-->
@@ -313,21 +315,6 @@
                 //refrescar paginacion
                 actualizarPaginacion(res.paginasTotales, res.paginaInicio)
             }).fail(function (err) { console.log(err.responseText) })
-        }
-
-        // Funciones auxiliares para formatear moneda y número
-        function formatCurrency(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                style: 'currency',
-                currency: 'MXN' // Ajusta la moneda si es necesario
-            }).format(number);
-        }
-
-        function formatNumber(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(number);
         }
 
         // Función para calcular el total a partir del jsonData

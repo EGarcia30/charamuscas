@@ -2,33 +2,35 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="container my-5">
+<div class="container my-2">
     <h1 class="text-center mb-4">Reporte</h1>
     <button class="btn btn-success mb-4">Exportar Excel </button>
     <div class="row g-4">
-
+        <p class="text-end text-secondary fs-6 m-0">Utilidad bruta</p>
         <!-- Medium item -->
         <div class="col-md-4">
+            
             <div class="bento-item flex-column border-start border-warning text-dark">
-                <span class="fw-bold">Ventas del Mes</span>
+                <span class="fw-bold text-wrap">Ventas del Mes</span>
                 <span id="ventasMes"></span>
             </div>
         </div>
         <!-- Medium item -->
         <div class="col-md-4">
             <div class="bento-item flex-column border-start border-info text-dark">
-                <span class="fw-bold">Ganancias del Mes</span>
+                <span class="fw-bold text-wrap">Ganancias del Mes</span>
                 <span id="gananciasMes"></span>
             </div>
         </div>
         <!-- Medium item -->
         <div class="col-md-4">
             <div class="bento-item flex-column border-start border-secondary text-dark">
-                <span class="fw-bold">Margen de ganancias del Mes</span>
+                <span class="fw-bold text-wrap">Rentabilidad del Mes</span>
                 <span id="margenGananciasMes"></span>
             </div>
         </div>
 
+        <p class="text-end text-secondary fs-6 m-0">Utilidad Neta</p>
         <!-- Large item -->
         <div class="col-md-8">
             <div class="bento-item bento-tall border-start border-primary">
@@ -53,30 +55,7 @@
     </div>
 </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Funciones auxiliares para formatear moneda y número
-        function formatCurrency(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                style: 'currency',
-                currency: 'MXN' // Ajusta la moneda si es necesario
-            }).format(number);
-        }
-
-        function formatNumber(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(number);
-        }
-
-        function formatPercent(number) {
-            return new Intl.NumberFormat('es-MX', { // Ajusta la localización si es necesario
-                style: 'percent',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(number);
-        }
-    </script>
+    <script src="~/js/site.js"></script>
     @section Scripts{
         <script>
 
@@ -101,6 +80,7 @@
                 }).fail(function (err) { console.log(err.responseText) })
             })
 
+            //Obtener ganancias del año utilidad neta
             $(document).ready(function () {
                 //Traer ganancias en formato JSON
                 var _url = '@Url.Action("Ganancias", "Reporte")';
@@ -110,15 +90,15 @@
                     //Transformar mis ganancias en grafico tipo bar
                     var ctx = document.getElementById('myChart').getContext('2d');
                     var myChart = new Chart(ctx, {
-                        type: 'bar', // Tipo de gráfico
+                        type: 'line', // Tipo de gráfico
                         data: {
                             labels: res.mesGanancia,
                             datasets: [{
                                 label: 'Ganancias del año',
                                 data: res.gananciaTotal,
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
+                                fill: false,
+                                borderColor: 'rgb(75, 192, 192)',
+                                tension: 0.1
                             }]
                         },
                         options: {
@@ -137,9 +117,10 @@
                 }).fail(function (err) { console.log(err.responseText) })
             })
 
+            //Obtener categorias mas vendidas
             $(document).ready(function () {
                 //Traer top categorias en formato JSON
-                var _url = '@Url.Action("ProductosMasVendidos", "Reporte")';
+                var _url = '@Url.Action("CategoriasMasVendidas", "Reporte")';
 
                 $.get(_url).done(function (res) {
                     console.log(res);
@@ -159,16 +140,48 @@
                             ],
                             hoverOffset: 4
                         }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
                     }
                 });
                     
+                }).fail(function (err) { console.log(err.responseText) })
+            })
+
+            //Obtener productos mas vendidos
+            $(document).ready(function () {
+                //Traer ganancias en formato JSON
+                var _url = '@Url.Action("ProductosMasVendidos", "Reporte")';
+
+                $.get(_url).done(function (res) {
+                    //Transformar mis ganancias en grafico tipo bar
+                    var ctx2 = document.getElementById('myChart2').getContext('2d');
+                    var myChart2 = new Chart(ctx2, {
+                        type: 'bar', // Tipo de gráfico
+                        data: {
+                            labels: res.nombre,
+                            datasets: [{
+                                label: 'Productos con mas Ventas',
+                                data: res.cantidad,
+                                backgroundColor: [
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)',
+                                ],
+                                borderColor: [
+                                    'rgb(75, 192, 192)',
+                                    'rgb(54, 162, 235)',
+                                    'rgb(153, 102, 255)',
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                }
+                            }
+                        }
+                    });
                 }).fail(function (err) { console.log(err.responseText) })
             })
         </script>
