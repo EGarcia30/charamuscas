@@ -1,6 +1,8 @@
 ﻿using charamuscas.entities.Entities;
 using charamuscas.mvc.Helper;
 using charamuscas.services.Contextos;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace charamuscas.mvc.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class InventarioController : Controller
     {
         private readonly Contexto _db;

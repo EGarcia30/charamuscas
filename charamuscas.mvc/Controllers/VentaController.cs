@@ -1,6 +1,8 @@
 ﻿using charamuscas.entities.Entities;
 using charamuscas.mvc.Helper;
 using charamuscas.services.Contextos;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace charamuscas.mvc.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class VentaController : Controller
     {
         private readonly Contexto _db;
@@ -232,7 +235,7 @@ namespace charamuscas.mvc.Controllers
                     var venta = await _db.venta.FirstOrDefaultAsync(x => x.PK_codigo == ventaId);
                     venta.total = total;
 
-                    _db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
 
                     var response = new
                     {

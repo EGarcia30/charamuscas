@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using charamuscas.services.Contextos;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<Contexto>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("charamuscasDB"))
 );
+
+//Cookie persistencia de usuario
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Usuarios/Login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.AccessDeniedPath = "/Usuarios/Login";
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdministradorPolicy", policy => policy.RequireRole("Administrador"));
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -27,6 +42,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseAuthentication();
+app.UseCookiePolicy();
 
 app.MapControllerRoute(
     name: "default",

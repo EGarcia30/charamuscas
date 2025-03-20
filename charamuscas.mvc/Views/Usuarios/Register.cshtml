@@ -1,0 +1,102 @@
+﻿@model charamuscas.entities.Entities.vw_usuarios;
+@using charamuscas.entities.Entities;
+@{
+    var usuarios_rol = (List<usuarios_rol>)ViewBag.usuarios_rol;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="~/img/controlX.png">
+    <title>Registrarse | ControlX</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/charamuscas.mvc.styles.css" asp-append-version="true" />
+    <!--Icons-->
+    <script src="https://kit.fontawesome.com/be9e926d45.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="d-flex">
+            <span class="text-uppercase fs-3 px-3 py-1">Nuevo usuario</span>
+            <span class="fs-3 px-3 py-1 rounded bg-primary text-light"><i class="fas fa-plus"></i></span>
+        </div>
+        <hr />
+    </div>
+
+    <form asp-controller="Usuarios" asp-action="Register" method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Nombres</label>
+                    <input type="text" class="form-control" name="nombres" id="nombres" />
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Apellidos</label>
+                    <input type="text" class="form-control" name="apellidos" id="apellidos" />
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Nombre de usuario *</label>
+                    <input type="text" class="form-control" name="nombre_usuario" id="nombre_usuario" required />
+                    <div class="invalid-feedback">Requerido.</div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Clave *</label>
+                    <div class="col-12 position-relative w-100">
+                        <input type="password" class="form-control" name="clave" id="clave" required />
+                        <button type="button" id="btnEye" class="position-absolute top-0 bottom-0 end-0 d-flex align-items-center px-3 py-2 rounded bg-transparent border-0" onclick="handlePassword()">
+                            <i id="iconEye" class="fas fa-eye text-secondary"></i>
+                        </button>
+                        <div class="invalid-feedback">Requerido.</div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Rol *</label>
+                    <select name="FK_rol" id="FK_rol" class="form-control" required>
+                        @foreach (var item in usuarios_rol)
+                        {
+                            <option value="@(item.PK_codigo)">
+                                @(item.PK_codigo) - @(item.nombre)
+                            </option>
+                        }
+                    </select>
+                    <div class="invalid-feedback">Requerido.</div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Correo </label>
+                    <input type="text" class="form-control" name="correo" id="correo" />
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-3">
+                    <label class="fs-5">Celular </label>
+                    <input type="text" class="form-control" name="celular" id="celular" />
+                </div>
+            </div>
+        </div>
+        <div class="nav-footer">
+            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-danger"><i class="fas fa-times"></i> <span class="d-md-inline-block d-none">Cancelar</span></a>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> <span class="d-md-inline-block d-none">Guardar</span></a>
+        </div>
+    </form>
+</body>
+</html>
+
+<script>
+    const btnEye = document.getElementById('btnEye');
+    const iconEye = document.getElementById('iconEye');
+    const inputPassword = document.getElementById('clave');
+
+    const handlePassword = () => {
+        if (iconEye.classList.contains('fa-eye')) {
+            inputPassword.setAttribute('type', 'text');
+            iconEye.classList.replace('fa-eye', 'fa-eye-slash');
+        }
+        else {
+            inputPassword.setAttribute('type', 'password');
+            iconEye.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>

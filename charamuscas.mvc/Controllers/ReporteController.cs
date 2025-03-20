@@ -1,11 +1,14 @@
 ﻿using charamuscas.entities.Entities;
 using charamuscas.services.Contextos;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace charamuscas.mvc.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class ReporteController : Controller
     {
         private readonly Contexto _db;
