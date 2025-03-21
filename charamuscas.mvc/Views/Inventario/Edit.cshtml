@@ -43,6 +43,12 @@
                        value="@(Model.precio_unitario.ToString("N2"))" step="0.01" />
                 <span asp-validation-for="precio_unitario"></span>
             </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Costo Unitario *</label>
+                <input type="number" class="form-control text-end" name="costo_unitario" id="costo_unitario"
+                       value="@(Model.costo_unitario.ToString("N2"))" step="0.01" />
+                <span asp-validation-for="costo_unitario"></span>
+            </div>
         </div>
     </div>
     <div class="nav-footer">

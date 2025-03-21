@@ -29,7 +29,8 @@ namespace charamuscas.mvc.Controllers
                     .Where(x => x.producto.Contains(search) || x.categoria.Contains(search))
                     .OrderByDescending(x => x.PK_codigo)
                     .ToListAsync();
-                return View(buscarInventario);
+
+                return View(Paginacion<vw_inventario>.CrearPaginacion(buscarInventario.AsQueryable(), numPag ?? 1, cantidadRegistros));
             }
 
             //todos los registros
@@ -60,6 +61,7 @@ namespace charamuscas.mvc.Controllers
                 if(value != null)
                 {
                     value.PK_hash = Guid.NewGuid();
+                    value.fecha_creacion = DateTime.Now;
                     await _db.inventario.AddAsync(value);
                     await _db.SaveChangesAsync();
                     
@@ -108,6 +110,7 @@ namespace charamuscas.mvc.Controllers
                     inventario.nombre = value.producto;
                     inventario.cantidad = value.cantidad;
                     inventario.precio_unitario = value.precio_unitario;
+                    inventario.costo_unitario = value.costo_unitario;
 
                     await _db.SaveChangesAsync();
                     return RedirectToAction("Details", "Inventario", new {id = inventario.PK_hash});

@@ -311,7 +311,7 @@
             $.post(_url,data).done(function(res){
                 //refrescar tabla de productos(venta_detalle)
                 crearTablaDetalle(res.productosDetalle)
-                console.log(res.paginaInicio);
+
                 //refrescar paginacion
                 actualizarPaginacion(res.paginasTotales, res.paginaInicio)
             }).fail(function (err) { console.log(err.responseText) })

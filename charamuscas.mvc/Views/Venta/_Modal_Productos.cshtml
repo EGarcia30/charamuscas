@@ -1,10 +1,31 @@
-﻿@model List<charamuscas.entities.Entities.vw_inventario>
+﻿@using charamuscas.entities.Entities
+@using charamuscas.mvc.Helper
+@model Paginacion<vw_inventario>
 <div class="modal-content">
     <div class="modal-header">
         <h3 class="modal-title">Productos</h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
+        <div class="container">
+            <!--Sub-Menu-->
+            <div class="d-flex flex-row-reverse mb-3">
+                <div class="d-flex justify-content-end w-100">
+                    <!--Formulario de busqueda-->
+                    <div class="d-flex">
+                        <input type="text"
+                               name="searchProducto"
+                               id="searchProducto"
+                               placeholder="Buscar"
+                               class="form-control me-1"
+                               onkeyup="buscarVentaDetalleInventario()" />
+                        <button type="button" onclick="buscarVentaDetalleInventario()" class="btn btn-dark">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead>
@@ -13,9 +34,10 @@
                         <th scope="col">Producto</th>
                         <th scope="col">Cantidad Disponible</th>
                         <th scope="col">Precio Unitario</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="inventarioMdl">
                     @foreach (var item in Model)
                     {
                         <tr id="@(item.PK_codigo)">
@@ -33,6 +55,33 @@
                 </tbody>
             </table>
         </div>
+        <!--Paginacion-->
+        @{
+            var anteriorDeshabilitado = !Model.PaginasAnteriores ? "disabled" : "";
+            var posterioresDeshabilitado = !Model.PaginasPosteriores ? "disabled" : "";
+        }
+
+        <div class="container">
+            <nav aria-label="Page navigation example">
+                <ul id="paginationMdl" class="pagination">
+                    <li class="page-item @anteriorDeshabilitado">
+                        <a class="page-link" onclick="buscarVentaDetalleInventario(@(Model.PaginaInicio - 1))" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    @for (var i = 1; i <= Model.PaginasTotales; i++)
+                    {
+                        var paginaActiva = (i == Model.PaginaInicio) ? "active" : "";
+                        <li class="page-item @paginaActiva"><a class="page-link" onclick="buscarVentaDetalleInventario(@(i))">@(i)</a></li>
+                    }
+                    <li class="page-item @posterioresDeshabilitado">
+                        <a class="page-link" onclick="buscarVentaDetalleInventario(@(Model.PaginaInicio + 1))" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -44,3 +93,108 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
     </div>
 </div>
+
+
+    <!--Refrescar tabla de inventario en modal-->
+    <script>
+        // Función para crear la tabla
+        function crearTablaInventario(model) {
+            const tbody = document.getElementById("inventarioMdl") // Selecciona el tbody existente en tu tabla
+
+            //restablecer infomación de la tabla
+            tbody.innerHTML = "";
+
+            model.forEach(item => {
+                // Crear fila <tr>
+                const tr = document.createElement("tr");
+                tr.id = item.PK_codigo;
+
+                // Crear celdas <td>
+                const tdCategoria = document.createElement("td");
+                tdCategoria.textContent = item.categoria;
+
+                const tdProducto = document.createElement("td");
+                tdProducto.textContent = item.producto;
+
+                const tdCantidad = document.createElement("td");
+                tdCantidad.textContent = item.cantidad.toFixed(2); // Formato N2
+
+                const tdPrecioUnitario = document.createElement("td");
+                tdPrecioUnitario.textContent = item.precio_unitario.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                const tdBoton = document.createElement("td");
+                const button = document.createElement("button");
+                button.className = "btn btn-secondary";
+                button.setAttribute("onclick", "AgregarProducto(" + item.pK_codigo + ")") // Función onclick
+                button.innerHTML = `<i class="fas fa-plus"></i> <span class="d-lg-inline-block d-none">Agregar</span>`;
+
+                tdBoton.appendChild(button);
+
+                // Agregar celdas a la fila
+                tr.appendChild(tdCategoria);
+                tr.appendChild(tdProducto);
+                tr.appendChild(tdCantidad);
+                tr.appendChild(tdPrecioUnitario);
+                tr.appendChild(tdBoton);
+
+                // Agregar fila al tbody
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+
+    <!--Refrescar paginacion en modal-->
+    <script>
+        function actualizarPaginacionMdl(paginasTotales, paginaInicio) {
+            var anteriorDeshabilitado = (paginaInicio === 1) ? "disabled" : "";
+            var posterioresDeshabilitado = (paginaInicio === paginasTotales) ? "disabled" : "";
+
+            var paginationHtml = `
+                                <li class="page-item ${anteriorDeshabilitado}">
+                                    <a class="page-link" onclick="buscarVentaDetalleInventario(${paginaInicio - 1})" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>`;
+
+            for (var i = 1; i <= paginasTotales; i++) {
+                var paginaActiva = (i === paginaInicio) ? "active" : "";
+                paginationHtml += `
+                                    <li class="page-item ${paginaActiva}">
+                                        <a class="page-link" onclick="buscarVentaDetalleInventario(${i})">${i}</a>
+                                    </li>`;
+            }
+
+            paginationHtml += `
+                                <li class="page-item ${posterioresDeshabilitado}">
+                                    <a class="page-link" onclick="buscarVentaDetalleInventario(${paginaInicio + 1})" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>`;
+
+            $('#paginationMdl').html(paginationHtml);
+        }
+    </script>
+
+    <!--Funcion de buscador en modal-->
+    <script>
+        function buscarVentaDetalleInventario(pagina) {
+            var data = {
+                search: $('#searchProducto').val(),
+                numPag: pagina
+            }
+            var _url = '@Url.Action("buscarVentaDetalleInventario", "Venta")';
+
+            $.post(_url, data).done(function (res) {
+                //refrescar tabla de productos(venta_detalle)
+                crearTablaInventario(res.productosDetalle)
+
+                //refrescar paginacion
+                actualizarPaginacionMdl(res.paginasTotales, res.paginaInicio)
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>

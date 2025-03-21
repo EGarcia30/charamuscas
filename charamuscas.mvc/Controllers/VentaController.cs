@@ -115,10 +115,48 @@ namespace charamuscas.mvc.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> _Modal_Productos()
+        public async Task<JsonResult> buscarVentaDetalleInventario(string search, int? numPag)
         {
+            int cantidadRegistros = 6;
+            if (!string.IsNullOrEmpty(search))
+            {
+                var inventarioFiltrado = await _db.vw_inventario
+                .Where(x => x.categoria.Contains(search) || x.producto.Contains(search))
+                .OrderByDescending(x => x.PK_codigo)
+                .ToListAsync();
+
+                var productosPagSearch = Paginacion<vw_inventario>.CrearPaginacion(inventarioFiltrado.AsQueryable(), numPag ?? 1, cantidadRegistros);
+
+                var responseSearch = new
+                {
+                    productosDetalle = productosPagSearch,
+                    paginaInicio = productosPagSearch.PaginaInicio,
+                    paginasTotales = productosPagSearch.PaginasTotales,
+                };
+
+                return Json(responseSearch);
+            }
+
+            var inventario = await _db.vw_inventario.OrderByDescending(x => x.PK_codigo).ToListAsync();
+
+            var productosPag = Paginacion<vw_inventario>.CrearPaginacion(inventario.AsQueryable(), numPag ?? 1, cantidadRegistros);
+
+            var response = new
+            {
+                productosDetalle = productosPag,
+                paginaInicio = productosPag.PaginaInicio,
+                paginasTotales = productosPag.PaginasTotales,
+            };
+
+            return Json(response);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> _Modal_Productos(int? numPag)
+        {
+            int cantidadRegistros = 6;
             var productos = await _db.vw_inventario.OrderByDescending(x => x.PK_codigo).ToListAsync();
-            return PartialView(productos);
+            return PartialView(Paginacion<vw_inventario>.CrearPaginacion(productos.AsQueryable(), numPag ?? 1, cantidadRegistros));
         }
 
         [HttpPost]

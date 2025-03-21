@@ -25,12 +25,20 @@
             <label class="d-block fw-bold fs-5">@(Model.producto)</label>
         </div>
         <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Fecha:</label>
+            <label class="d-block fw-bold fs-5">@(Model.fecha_creacion.ToString("dd/MM/yyyy"))</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
             <label class="fs-5">Cantidad Disponible:</label>
             <label class="d-block fw-bold fs-5">@(Model.cantidad.ToString("N2"))</label>
         </div>
         <div class="col-lg-4 col-md-6 col-12 mb-3">
             <label class="fs-5">Precio Unitario:</label>
             <label class="d-block fw-bold fs-5">@(Model.precio_unitario.ToString("C2"))</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Costo Unitario:</label>
+            <label class="d-block fw-bold fs-5">@(Model.costo_unitario.ToString("C2"))</label>
         </div>
     </div>
 </div>

@@ -25,7 +25,7 @@ namespace charamuscas.mvc.Controllers
             if (!String.IsNullOrEmpty(search))
             {
                 var buscarCompra = await _db.compra.Where(x => x.nombre.Contains(search)).OrderByDescending(x => x.PK_codigo).ToListAsync();
-                return View(buscarCompra);
+                return View(Paginacion<compra>.CrearPaginacion(buscarCompra.AsQueryable(), numPag ?? 1, cantidadRegistros));
             }
             var compras = await _db.compra.OrderByDescending(x => x.PK_codigo).Take(100).ToListAsync();
 
