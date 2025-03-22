@@ -24,6 +24,7 @@ namespace charamuscas.services.Contextos
         public DbSet<usuarios> usuarios { get; set; }
         public DbSet<vw_usuarios> vw_usuarios { get; set; }
         public DbSet<usuarios_rol> usuarios_rol { get; set; }
+        public DbSet<gastos_operativos> gastos_operativos { get; set; }
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties<decimal>().HavePrecision(20, 8);

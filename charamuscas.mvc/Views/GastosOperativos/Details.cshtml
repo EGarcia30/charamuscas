@@ -1,0 +1,38 @@
+﻿@model charamuscas.entities.Entities.gastos_operativos
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Gastos Operativos";
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Gastos Operativos</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Fecha:</label>
+            <label class="d-block fw-bold fs-5">@(Model.fecha.ToString("dd/MM/yyyy"))</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Descripción:</label>
+            <label class="d-block fw-bold fs-5">@(Model.descripcion)</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Monto:</label>
+            <label class="d-block fw-bold fs-5">@(Model.monto.ToString("C2"))</label>
+        </div>
+    </div>
+</div>
+
+<div class="nav-footer">
+    <a asp-action="Index" asp-controller="GastosOperativos" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todos los gastos operativos</span></a>
+    <a asp-action="Create" asp-controller="GastosOperativos" class="btn btn-primary"><i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">Nuevo</span></a>
+    <a asp-action="Edit" asp-controller="GastosOperativos" asp-route-id="@(Model.PK_codigo)" class="btn btn-primary"><i class="fas fa-pencil-alt"></i> <span class="d-md-inline-block d-none">Editar</span></a>
+</div>

@@ -18,11 +18,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Usuarios/Login";
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdministradorPolicy", policy => policy.RequireRole("Administrador"));
-});
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -41,8 +36,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseCookiePolicy();
 
 app.MapControllerRoute(

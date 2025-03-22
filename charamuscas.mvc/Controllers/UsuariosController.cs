@@ -46,15 +46,7 @@ namespace charamuscas.mvc.Controllers
 
                     Auth.CreateCookie(HttpContext, userBd);
 
-                    switch (userBd.rol)
-                    {
-                        case "Administrador":
-                            return RedirectToAction("Index", "Home");
-                        case "Contador":
-                            return RedirectToAction("Index", "Home");
-                        default:
-                            return View();
-                    }
+                    return RedirectToAction("Index", "Home");
                 }
                 return View();
             }
@@ -64,13 +56,14 @@ namespace charamuscas.mvc.Controllers
                 return View();
             }
         }
-        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+
+        [Authorize(Roles ="Administrador")]
         public async Task<IActionResult> Register()
         {
             ViewBag.usuarios_rol = await _db.usuarios_rol.ToListAsync();
             return View();
         }
-        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         public async Task<IActionResult> Register(usuarios user, string clave)
         {
@@ -116,7 +109,7 @@ namespace charamuscas.mvc.Controllers
 
         }
 
-        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        [Authorize(Roles = "Administrador,Contador,Usuario")]
         public IActionResult Logout()
         {
             Auth.DeleteCookie(HttpContext);

@@ -13,7 +13,7 @@ namespace charamuscas.mvc.Helper
             {
                 new Claim("id", user.PK_codigo.ToString()),
                 new Claim("nombre_usuario", user.nombre_usuario),
-                new Claim(ClaimTypes.Role, user.rol.ToString().ToLower()),
+                new Claim(ClaimTypes.Role, user.rol),
                 new Claim(ClaimTypes.Email, user.correo),
                 new Claim(ClaimTypes.MobilePhone, user.celular)
             };

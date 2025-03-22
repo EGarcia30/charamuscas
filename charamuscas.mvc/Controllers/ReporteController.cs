@@ -81,8 +81,8 @@ namespace charamuscas.mvc.Controllers
                     //venta de ese mes
                     var ventaMes = await _db.venta.Where(x => x.fecha_hora.Month == item.Mes).Select(x => new { PK_codigo = x.PK_codigo}).ToListAsync();
 
-                    //compras de ese mes
-                    var compraDelMes = await _db.compra.Where(x => x.fecha_compra.Month == item.Mes).SumAsync(x => x.costo_total);
+                    //gastos de ese mes
+                    var gastoDelMes = await _db.gastos_operativos.Where(x => x.fecha.Month == item.Mes).SumAsync(x => x.monto);
 
                     //inicializar total de $$ de ventas de ese mes
                     var ventaDetalleMes = 0.00m;
@@ -96,7 +96,7 @@ namespace charamuscas.mvc.Controllers
                     }
 
                     //ganancias utilidad neta en el mes que se realizo
-                    ganancia.Add(ventaDetalleMes - compraDelMes);
+                    ganancia.Add(ventaDetalleMes - gastoDelMes);
                     DateTimeFormatInfo formatoFecha = CultureInfo.CurrentCulture.DateTimeFormat;
                     mes.Add(formatoFecha.GetMonthName(item.Mes));
                 }

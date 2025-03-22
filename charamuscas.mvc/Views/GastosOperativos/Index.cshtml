@@ -1,0 +1,88 @@
+﻿@using charamuscas.entities.Entities
+@using charamuscas.mvc.Helper
+@model Paginacion<gastos_operativos>
+@{
+    ViewData["Title"] = "Gastos Operativos";
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Gastos Operativos</span>
+    </div>
+    <hr />
+</div>
+
+<div class="container">
+    <div class="d-flex flex-row-reverse">
+        <form asp-action="Index" asp-controller="GastosOperativos" class="d-flex">
+            <input type="text"
+                   name="search"
+                   placeholder="Buscar"
+                   class="form-control me-1" />
+            <button type="submit" class="btn btn-dark">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td><a asp-action="Details" asp-controller="GastosOperativos" asp-route-id="@item.PK_codigo">@item.PK_codigo</a></td>
+                        <td>@item.fecha</td>
+                        <td>@(item.descripcion)</td>
+                        <td>@(item.monto.ToString("C2"))</td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="fw-bold">Total</td>
+                    <td>@(Model.Sum(x => x.monto).ToString("C2"))</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--Paginacion-->
+@{
+    var anteriorDeshabilitado = !Model.PaginasAnteriores ? "disabled" : "";
+    var posterioresDeshabilitado = !Model.PaginasPosteriores ? "disabled" : "";
+}
+
+<div class="container mb-4 pb-5">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item @anteriorDeshabilitado">
+                <a class="page-link" asp-action="Index" asp-route-numPag="@(Model.PaginaInicio - 1)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (var i = 1; i <= Model.PaginasTotales; i++)
+            {
+                var paginaActiva = (i == Model.PaginaInicio) ? "active" : "";
+                <li class="page-item @paginaActiva"><a class="page-link" asp-action="Index" asp-route-numPag="@(i)">@(i)</a></li>
+            }
+            <li class="page-item @posterioresDeshabilitado">
+                <a class="page-link" asp-action="Index" asp-route-numPag="@(Model.PaginaInicio + 1)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div class="nav-footer">
+    <a asp-action="Create" asp-controller="GastosOperativos" class="btn btn-primary"><i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">Nuevo Gasto Operativo</span></a>
+</div>
