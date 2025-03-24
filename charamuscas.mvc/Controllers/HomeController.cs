@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace charamuscas.mvc.Controllers
 {
-    [Authorize(Roles = "Administrador,Contador,Usuario")]
+    [Authorize(Roles = "Administrador")]
     public class HomeController : Controller
     {
         private readonly Contexto _db;

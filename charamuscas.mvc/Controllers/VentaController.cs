@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace charamuscas.mvc.Controllers
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Administrador,Usuario")]
     public class VentaController : Controller
     {
         private readonly Contexto _db;

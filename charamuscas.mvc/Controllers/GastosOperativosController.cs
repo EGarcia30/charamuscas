@@ -1,12 +1,14 @@
 ﻿using charamuscas.entities.Entities;
 using charamuscas.mvc.Helper;
 using charamuscas.services.Contextos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace charamuscas.mvc.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class GastosOperativosController : Controller
     {
         private readonly Contexto _db;

@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,17 +28,33 @@
                                 </a>
 
                                 <ul class="dropdown-menu">
-                                    <li><a class="nav-link text-dark @(User.IsInRole("Usuario") || User.IsInRole("Contador") ? "disabled" : "")" asp-area="" asp-controller="Home" asp-action="Index">Administración</a></li>
-                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Ventas" asp-action="Index">Ventas</a></li>
-                                    <li><a class="nav-link text-dark" href="#">Contabilidad</a></li>
+                                    <li><a class="dropdown-item @(User.IsInRole("Usuario") || User.IsInRole("Contador") ? "disabled" : "")" asp-area="" asp-controller="Home" asp-action="Index">Administración</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Venta" asp-action="Index">Ventas</a></li>
+                                    <li><a class="dropdown-item" href="#">Contabilidad</a></li>
                                 </ul>
                             </div>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark px-3" asp-area="" asp-controller="Venta" asp-action="Index">Ventas</a>
-                        </li>
+                        </li> 
                         <li class="nav-item">
-                            <a class="nav-link text-dark px-3" asp-area="" asp-controller="Usuarios" asp-action="Logout">Cerrar Sesión</a>
+                            <div class="dropdown pt-1">
+                                <a class="d-flex justify-content-sm-center align-items-center text-decoration-none text-dark px-3 py-2" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="far fa-user"></i>
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-start">
+                                    <li>
+                                        <a class="dropdown-item disabled">@(User.FindFirstValue("nombre_usuario"))</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item disabled">@(User.FindFirstValue(ClaimTypes.Role))</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Usuarios" asp-action="Logout">Cerrar Sesión</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
                     </ul>
                 </div>

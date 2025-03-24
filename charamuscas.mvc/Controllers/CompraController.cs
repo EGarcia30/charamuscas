@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace charamuscas.mvc.Controllers
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Administrador")]
     public class CompraController : Controller
     {
         private readonly Contexto _db;

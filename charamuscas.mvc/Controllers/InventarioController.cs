@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace charamuscas.mvc.Controllers
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Administrador")]
     public class InventarioController : Controller
     {
         private readonly Contexto _db;

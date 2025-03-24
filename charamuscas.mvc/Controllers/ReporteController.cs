@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace charamuscas.mvc.Controllers
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Administrador")]
     public class ReporteController : Controller
     {
         private readonly Contexto _db;
