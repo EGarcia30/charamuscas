@@ -46,7 +46,15 @@ namespace charamuscas.mvc.Controllers
 
                     Auth.CreateCookie(HttpContext, userBd);
 
-                    return RedirectToAction("Index", "Home");
+                    switch (userBd.rol)
+                    {
+                        case "Administrador":
+                            return RedirectToAction("Index", "Home");
+                        case "Usuario":
+                            return RedirectToAction("Index", "Venta");
+                        default:
+                            return View();
+                    }
                 }
                 return View();
             }
