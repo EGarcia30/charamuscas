@@ -1,0 +1,34 @@
+﻿@model charamuscas.entities.Entities.inventario_categoria
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_LayoutAdministrador.cshtml";
+    ViewData["Title"] = "Categoria de inventario";
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Categoria de inventario</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<form id="Form" asp-action="Edit" asp-controller="Categorias" method="post">
+    <div class="container">
+        <div class="row">
+            <input type="hidden" asp-for="PK_codigo" />
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Nombre *</label>
+                <input type="text" class="form-control" asp-for="nombre" />
+                <span asp-validation-for="nombre"></span>
+            </div>
+        </div>
+    </div>
+    <div class="nav-footer">
+        <a asp-action="Index" asp-controller="Categorias" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todas las Categorias</span></a>
+        <a asp-action="Details" asp-controller="Categorias" asp-route-id="@(Model.PK_codigo)" class="btn btn-outline-danger"><i class="fas fa-times"></i> <span class="d-md-inline-block d-none">Cancelar</span></a>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> <span class="d-md-inline-block d-none">Guardar</span></a>
+    </div>
+</form>

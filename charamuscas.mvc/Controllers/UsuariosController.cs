@@ -18,6 +18,31 @@ namespace charamuscas.mvc.Controllers
         public UsuariosController(Contexto db) {
             _db = db;
         }
+
+        public async Task<IActionResult> Index(string search, int? numPag)
+        {
+            int cantidadRegistros = 6;
+            if (!String.IsNullOrEmpty(search))
+            {
+                var usuariosFiltrado = await _db.vw_usuarios
+                    .Where(x => x.nombres.Contains(search) || x.apellidos.Contains(search) || x.nombre_usuario.Contains(search)
+                    || x.correo.Contains(search) || x.rol.Contains(search))
+                    .OrderByDescending(x => x.PK_codigo)
+                    .ToListAsync();
+
+                return View(Paginacion<vw_usuarios>.CrearPaginacion(usuariosFiltrado.AsQueryable(), numPag ?? 1, cantidadRegistros));
+            }
+
+            var usuarios = await _db.vw_usuarios.OrderByDescending(x => x.PK_codigo).ToListAsync();
+            return View(Paginacion<vw_usuarios>.CrearPaginacion(usuarios.AsQueryable(), numPag ?? 1, cantidadRegistros));
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var usuario = await _db.vw_usuarios.FirstOrDefaultAsync(x => x.PK_codigo == id);
+            return View(usuario);
+        }
+
         public IActionResult Login()
         {
             return View();
