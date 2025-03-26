@@ -1,0 +1,82 @@
+﻿@model charamuscas.entities.Entities.vw_usuarios
+<div class="modal-content">
+    <div class="modal-header">
+        <h3 class="modal-title">Editar Contraseña</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="Form" class="needs-validation" novalidate>
+        <div class="modal-body">
+
+            <h4>@(Model.nombre_usuario)</h4>
+            <input asp-for="PK_codigo" type="hidden" />
+            <div class="col-12 position-relative w-100">
+                <input type="password"
+                       name="clave"
+                       id="clave"
+                       placeholder="Nueva Contraseña"
+                       class="form-control my-2" />
+                <button type="button" id="btnEye" class="position-absolute top-0 bottom-0 end-0 d-flex align-items-center px-3 py-2 rounded bg-transparent border-0" onclick="handlePassword()">
+                    <i id="iconEye" class="fas fa-eye text-secondary"></i>
+                </button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-primary" onclick="cambiarClave()">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function cambiarClave() {
+        var data = {
+            PK_codigo: $("#PK_codigo").val(),
+            clave: $("#clave").val()
+        };
+
+        var _url = '@Url.Action("CambiarClave", "Usuarios")';
+
+        $.post(_url, data).done(function (res) {
+            if (res != null) {
+                $('#clave-modal').modal('hide');
+            }
+        }).fail(function (err) { console.log(err.responseText) })
+    }
+</script>
+<script>
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+<script>
+    const btnEye = document.getElementById('btnEye');
+    const iconEye = document.getElementById('iconEye');
+    const inputPassword = document.getElementById('clave');
+
+    const handlePassword = () => {
+        if (iconEye.classList.contains('fa-eye')) {
+            inputPassword.setAttribute('type', 'text');
+            iconEye.classList.replace('fa-eye', 'fa-eye-slash');
+        }
+        else {
+            inputPassword.setAttribute('type', 'password');
+            iconEye.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>

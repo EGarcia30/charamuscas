@@ -1,0 +1,61 @@
+﻿@model charamuscas.entities.Entities.vw_usuarios
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_LayoutAdministrador.cshtml";
+    ViewData["Title"] = "Usuarios";
+    
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Usuarios</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<form id="Form" asp-action="Edit" asp-controller="Usuarios" method="post">
+    <div class="container">
+        <div class="row">
+            <input type="hidden" asp-for="PK_codigo" />
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Nombres *</label>
+                <input type="text" class="form-control" asp-for="nombres" />
+                <span asp-validation-for="nombres"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Apellidos *</label>
+                <input type="text" class="form-control" asp-for="apellidos" />
+                <span asp-validation-for="apellidos"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Nombre de Usuario *</label>
+                <input type="text" class="form-control" asp-for="nombre_usuario" />
+                <span asp-validation-for="nombre_usuario"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Rol *</label>
+                <select asp-for="FK_rol" asp-items="ViewBag.roles" class="form-control">
+                </select>
+                <span asp-validation-for="FK_rol"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Correo *</label>
+                <input type="text" class="form-control" asp-for="correo" />
+                <span asp-validation-for="correo"></span>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <label class="fs-5">Celular *</label>
+                <input type="text" class="form-control" asp-for="celular" />
+                <span asp-validation-for="celular"></span>
+            </div>
+        </div>
+    </div>
+    <div class="nav-footer">
+        <a asp-action="Index" asp-controller="Usuarios" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todos los Usuarios</span></a>
+        <a asp-action="Details" asp-controller="Usuarios" asp-route-id="@(Model.PK_codigo)" class="btn btn-outline-danger"><i class="fas fa-times"></i> <span class="d-md-inline-block d-none">Cancelar</span></a>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> <span class="d-md-inline-block d-none">Guardar</span></a>
+    </div>
+</form>

@@ -1,0 +1,80 @@
+﻿@model charamuscas.entities.Entities.vw_usuarios
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_LayoutAdministrador.cshtml";
+    ViewData["Title"] = "Usuarios";
+}
+
+<div class="container-fluid">
+    <div class="d-flex">
+        <span class="text-uppercase fs-3 px-3 py-1">Usuarios</span>
+        <span class="fs-3 px-3 py-1 rounded bg-primary text-light">@(Model.PK_codigo)</span>
+    </div>
+    <hr />
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Nombre Completo:</label>
+            <label class="d-block fw-bold fs-5">@(Model.nombres) @(Model.apellidos)</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Nombre de Usuario:</label>
+            <label class="d-block fw-bold fs-5">@(Model.nombre_usuario)</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Rol:</label>
+            <label class="d-block fw-bold fs-5">@(Model.rol)</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Correo:</label>
+            <label class="d-block fw-bold fs-5">@(Model.correo)</label>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12 mb-3">
+            <label class="fs-5">Celular:</label>
+            <label class="d-block fw-bold fs-5">@(Model.celular)</label>
+        </div>
+    </div>
+</div>
+
+<div class="nav-footer">
+    <a asp-action="Index" asp-controller="Usuarios" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> <span class="d-md-inline-block d-none">Todas los Usuarios</span></a>
+    <a asp-action="Create" asp-controller="Usuarios" class="btn btn-primary"><i class="fas fa-plus"></i> <span class="d-md-inline-block d-none">Nuevo</span></a>
+    <a asp-action="Edit" asp-controller="Usuarios" asp-route-id="@(Model.PK_codigo)" class="btn btn-primary"><i class="fas fa-pencil-alt"></i> <span class="d-md-inline-block d-none">Editar</span></a>
+    <!-- Default dropup button -->
+    <div class="btn-group dropup">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-cogs"></i> <span class="d-md-inline-block d-none">Menu</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-start">
+            <!-- Dropdown menu links -->
+            <li class="nav-item"><a class="dropdown-item" role="button" onclick="abrirCambiarClave()"><i class="fas fa-unlock"></i> Cambiar Contraseña</a></li>
+        </ul>
+    </div>
+</div>
+
+<!--Modal de cambiar clave en vista parcial-->
+<div class="modal fade" id="clave-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function abrirCambiarClave(){
+            var data = {
+                id: @Model.PK_codigo
+            };
+
+            var _url = '@Url.Action("_Modal_Cambiar_Clave","Usuarios")';
+
+            $.post(_url,data).done(function(res){
+                $('#clave-modal .modal-dialog').html(res);
+                $('#clave-modal').modal('show');
+            }).fail(function (err) { console.log(err.responseText) })
+        }
+    </script>
+}
